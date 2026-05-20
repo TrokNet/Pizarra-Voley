@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizarra Táctica de Voleibol - VoleyTactics</title>
+    <meta name="description" content="Una pizarra táctica interactiva avanzada para voleibol. Diseña estrategias, rotaciones y anima jugadas en tiempo real.">
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="logo-area">
+                <svg class="header-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="12" cy="12" r="10" stroke-dasharray="4 2"></circle>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                    <path d="M2 12h20"></path>
+                </svg>
+                <div class="logo-text">
+                    <h1>Voley<span>Tactics</span></h1>
+                    <span class="tagline">Pizarra Táctica Interactiva</span>
+                </div>
+            </div>
+            
+            <div class="quick-status">
+                <div class="status-indicator">
+                    <span class="dot pulse"></span>
+                    <span id="active-play-name">Jugada Nueva</span>
+                </div>
+                <div class="save-status" id="save-status">Todos los cambios guardados</div>
+            </div>
+
+            <!-- PROFILE BADGE & SESSION (NUEVO) -->
+            <div class="header-profile" id="header-profile-section" style="display: none;">
+                <div class="user-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-avatar"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </div>
+                <span class="username" id="header-username">Entrenador</span>
+                <button id="btn-logout" class="btn-logout" title="Cerrar Sesión">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon-logout"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                </button>
+            </div>
+
+            <div class="header-actions">
+                <button id="btn-save-play" class="btn btn-primary" title="Guardar Jugada">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                    <span>Guardar</span>
+                </button>
+                <button id="btn-export-png" class="btn btn-secondary" title="Exportar como Imagen PNG">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    <span>Exportar PNG</span>
+                </button>
+                <button id="btn-help" class="btn btn-icon" title="Ayuda / Guía rápida">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN LAYOUT -->
+        <div class="app-workspace">
+            <!-- PANEL IZQUIERDO: HERRAMIENTAS Y AJUSTES -->
+            <aside class="sidebar sidebar-left" aria-label="Herramientas de dibujo y cancha">
+                <!-- SECCIÓN DIBUJO -->
+                <div class="panel-section">
+                    <h2 class="section-title">Herramientas Tácticas</h2>
+                    
+                    <div class="tool-grid">
+                        <button id="tool-select" class="tool-btn active" title="Seleccionar y Mover Fichas">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"></path><path d="M13 13l6 6"></path></svg>
+                            <span>Mover</span>
+                        </button>
+                        <button id="tool-draw" class="tool-btn" title="Dibujar Línea Libre">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                            <span>Trazo</span>
+                        </button>
+                        <button id="tool-arrow-player" class="tool-btn" title="Flecha de Carrera del Jugador (Línea Continua)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><line x1="5" y1="19" x2="17" y2="7"></line><polyline points="10 7 17 7 17 14"></polyline></svg>
+                            <span>Carrera</span>
+                        </button>
+                        <button id="tool-arrow-ball" class="tool-btn" title="Trayectoria del Balón (Línea Discontinua)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><line x1="5" y1="19" x2="17" y2="7" stroke-dasharray="3 3"></line><polyline points="10 7 17 7 17 14"></polyline></svg>
+                            <span>Pase</span>
+                        </button>
+                        <button id="tool-eraser" class="tool-btn" title="Borrador de Trazos">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M20 20H7L3 16c-1.5-1.5-1.5-3.5 0-5l8.5-8.5c1.5-1.5 3.5-1.5 5 0l4 4c1.5 1.5 1.5 3.5 0 5L12 20"></path><line x1="6" y1="11" x2="16" y2="20"></line></svg>
+                            <span>Borrar</span>
+                        </button>
+                        <button id="btn-clear-drawings" class="tool-btn danger" title="Limpiar todos los dibujos">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                            <span>Limpiar</span>
+                        </button>
+                    </div>
+
+                    <!-- AJUSTES DE DIBUJO -->
+                    <div class="drawing-settings">
+                        <div class="setting-row">
+                            <label>Color:</label>
+                            <div class="color-picker-group">
+                                <button class="color-btn active" data-color="#ff4757" style="--color-pick: #ff4757;" title="Rojo (Ataque/Remate)"></button>
+                                <button class="color-btn" data-color="#2ed573" style="--color-pick: #2ed573;" title="Verde (Defensa/Apoyo)"></button>
+                                <button class="color-btn" data-color="#1e90ff" style="--color-pick: #1e90ff;" title="Azul (Bloqueo/Movimientos)"></button>
+                                <button class="color-btn" data-color="#ffa502" style="--color-pick: #ffa502;" title="Naranja (Balón/Tácticas)"></button>
+                                <button class="color-btn" data-color="#ffffff" style="--color-pick: #ffffff;" title="Blanco"></button>
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <label for="range-stroke-width">Grosor:</label>
+                            <input type="range" id="range-stroke-width" min="2" max="10" value="4" class="slider">
+                            <span id="stroke-width-value" class="slider-val">4px</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PERSONALIZACIÓN CANCHA -->
+                <div class="panel-section">
+                    <h2 class="section-title">Ajustes de Cancha</h2>
+                    <div class="settings-stack">
+                        <div class="setting-field">
+                            <span class="field-label">Vista de Cancha</span>
+                            <div class="toggle-btn-group">
+                                <button id="btn-court-full" class="btn btn-toggle active">Completa</button>
+                                <button id="btn-court-half" class="btn btn-toggle">Media Cancha</button>
+                            </div>
+                        </div>
+
+                        <div class="setting-field">
+                            <span class="field-label">Estilo Visual</span>
+                            <select id="select-court-style" class="select-modern">
+                                <option value="classic-blue">Clásico FIVB (Azul/Naranja)</option>
+                                <option value="neon-dark">Neón Nocturno (Premium)</option>
+                                <option value="hardwood">Madera Tradicional</option>
+                                <option value="minimalist">Mínimo Gris</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-field">
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="chk-show-zones" checked>
+                                <span class="checkmark"></span>
+                                Mostrar números de zonas (1-6)
+                            </label>
+                        </div>
+                        
+                        <div class="setting-field">
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="chk-show-net" checked>
+                                <span class="checkmark"></span>
+                                Mostrar red 3D virtual
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BIBLIOTECA DE PIZARRAS GUARDADAS -->
+                <div class="panel-section flex-grow">
+                    <div class="section-header-row">
+                        <h2 class="section-title">Mis Jugadas</h2>
+                        <button id="btn-new-play" class="btn btn-icon-small" title="Crear jugada en blanco">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        </button>
+                    </div>
+                    <div class="saved-plays-list" id="saved-plays-list">
+                        <!-- Se llena dinámicamente -->
+                        <div class="empty-state">No hay jugadas guardadas localmente.</div>
+                    </div>
+                    <div class="storage-actions">
+                        <button id="btn-import-json" class="btn btn-secondary btn-full btn-sm">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                            Importar JSON
+                        </button>
+                        <input type="file" id="file-input-json" accept=".json" style="display: none;">
+                        <button id="btn-export-json" class="btn btn-secondary btn-full btn-sm">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            Exportar JSON
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- WORKSPACE CENTRAL: PIZARRA Y CANCHA -->
+            <main class="main-canvas-area" aria-label="Pizarra táctica interactiva">
+                <div class="court-viewport-container">
+                    <div class="court-card" id="court-card">
+                        <!-- CONTENEDOR DE LA CANCHA SVG E INTERACTIVA -->
+                        <div class="svg-court-wrapper" id="svg-court-wrapper">
+                            <svg id="volleyball-court" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+                                <!-- Definición de filtros para efectos neón / sombras -->
+                                <defs>
+                                    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                                        <feGaussianBlur stdDeviation="5" result="blur" />
+                                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                                    </filter>
+                                    <filter id="player-shadow" x="-20%" y="-20%" width="140%" height="140%">
+                                        <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.35"/>
+                                    </filter>
+                                    <filter id="ball-shadow" x="-30%" y="-30%" width="160%" height="160%">
+                                        <feDropShadow dx="2" dy="5" stdDeviation="3" flood-color="#000000" flood-opacity="0.5"/>
+                                    </filter>
+                                </defs>
+                                
+                                <!-- Cancha base -->
+                                <rect id="court-background" x="0" y="0" width="1000" height="600" rx="10" />
+                                
+                                <g id="court-zones-visual">
+                                    <rect id="zone-out" x="50" y="50" width="900" height="500" class="court-zone-out" />
+                                    <rect id="court-playable" x="100" y="100" width="800" height="400" class="court-zone-in" />
+                                    <line id="net-under-line" x1="500" y1="90" x2="500" y2="510" class="court-line-net-base" stroke-dasharray="5 5" stroke-opacity="0.5" />
+                                </g>
+
+                                <!-- Líneas de juego -->
+                                <g id="court-lines">
+                                    <rect x="100" y="100" width="800" height="400" fill="none" stroke="#ffffff" stroke-width="6" />
+                                    <line x1="500" y1="100" x2="500" y2="500" stroke="#ffffff" stroke-width="6" />
+                                    <line x1="366.67" y1="100" x2="366.67" y2="500" stroke="#ffffff" stroke-dasharray="10 5" stroke-width="4" />
+                                    <line x1="366.67" y1="100" x2="366.67" y2="500" stroke="#ffffff" stroke-width="4" class="solid-attack-line" />
+                                    <line x1="633.33" y1="100" x2="633.33" y2="500" stroke="#ffffff" stroke-dasharray="10 5" stroke-width="4" />
+                                    <line x1="633.33" y1="100" x2="633.33" y2="500" stroke="#ffffff" stroke-width="4" class="solid-attack-line" />
+                                    
+                                    <!-- Marcas de saque -->
+                                    <line x1="100" y1="80" x2="100" y2="100" stroke="#ffffff" stroke-width="3" />
+                                    <line x1="100" y1="500" x2="100" y2="520" stroke="#ffffff" stroke-width="3" />
+                                    <line x1="900" y1="80" x2="900" y2="100" stroke="#ffffff" stroke-width="3" />
+                                    <line x1="900" y1="500" x2="900" y2="520" stroke="#ffffff" stroke-width="3" />
+                                </g>
+
+                                <!-- Zonas SVG (Glow) -->
+                                <g id="court-zones-text" class="zones-label-group">
+                                    <!-- Campo Izquierdo -->
+                                    <text x="433.33" y="160" class="zone-number-svg">4</text>
+                                    <text x="300.00" y="160" class="zone-number-svg">3</text>
+                                    <text x="166.67" y="160" class="zone-number-svg">2</text>
+                                    <text x="433.33" y="440" class="zone-number-svg">5</text>
+                                    <text x="300.00" y="440" class="zone-number-svg">6</text>
+                                    <text x="166.67" y="440" class="zone-number-svg">1</text>
+                                    
+                                    <!-- Campo Derecho -->
+                                    <text x="566.67" y="160" class="zone-number-svg">2</text>
+                                    <text x="700.00" y="160" class="zone-number-svg">3</text>
+                                    <text x="833.33" y="160" class="zone-number-svg">4</text>
+                                    <text x="566.67" y="440" class="zone-number-svg">1</text>
+                                    <text x="700.00" y="440" class="zone-number-svg">6</text>
+                                    <text x="833.33" y="440" class="zone-number-svg">5</text>
+                                </g>
+
+                                <!-- CAPA DE DIBUJOS TÁCTICOS -->
+                                <g id="tactical-drawings-group"></g>
+
+                                <!-- RED TÁCTICA VIRTUAL -->
+                                <g id="court-net-visual">
+                                    <rect x="495" y="80" width="10" height="440" fill="url(#net-pattern)" opacity="0.8" />
+                                    <circle cx="500" cy="80" r="5" fill="#ff4757" />
+                                    <circle cx="500" cy="520" r="5" fill="#ff4757" />
+                                    <line x1="500" y1="80" x2="500" y2="520" stroke="#7f8c8d" stroke-width="4" />
+                                    <line x1="500" y1="80" x2="500" y2="520" stroke="#ffffff" stroke-width="2" id="net-top-band" />
+                                </g>
+
+                                <!-- CAPA DE JUGADORES Y BALÓN -->
+                                <g id="players-group"></g>
+                                <g id="drag-proxy" pointer-events="none"></g>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LÍNEA DE TIEMPO -->
+                <div class="timeline-card">
+                    <div class="timeline-header">
+                        <div class="timeline-title-row">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon timeline-main-icon"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="3" x2="12" y2="21"></line><line x1="3" y1="12" x2="21" y2="12"></line></svg>
+                            <h3>Secuencia de Jugada (Animación)</h3>
+                        </div>
+                        <div class="playback-controls">
+                            <button id="anim-btn-prev" class="btn btn-icon-small" title="Paso Anterior">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
+                            </button>
+                            <button id="anim-btn-play" class="btn btn-icon-small btn-highlight" title="Reproducir Jugada">
+                                <svg id="icon-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                <svg id="icon-pause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon" style="display: none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                            </button>
+                            <button id="anim-btn-next" class="btn btn-icon-small" title="Siguiente Paso">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+                            </button>
+                            <div class="divider-v"></div>
+                            <button id="btn-add-frame" class="btn btn-secondary btn-sm" title="Agregar paso nuevo">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                <span>Agregar Paso</span>
+                            </button>
+                            <button id="btn-delete-frame" class="btn btn-danger-outline btn-sm" title="Eliminar paso" disabled>
+                                <span>Eliminar Paso</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="timeline-body">
+                        <div class="frames-container-scroll">
+                            <div class="frames-track" id="frames-track"></div>
+                        </div>
+                        <div class="playback-settings">
+                            <label for="select-play-speed">Velocidad:</label>
+                            <select id="select-play-speed" class="select-modern select-xs">
+                                <option value="1500">Lento (1.5s)</option>
+                                <option value="1000" selected>Normal (1.0s)</option>
+                                <option value="600">Rápido (0.6s)</option>
+                                <option value="300">Muy Rápido (0.3s)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- PANEL DERECHO: EQUIPOS Y SISTEMAS PREDEFINIDOS -->
+            <aside class="sidebar sidebar-right" aria-label="Equipos y tácticas predefinidas">
+                <!-- SECCIÓN EDITAR SELECCIONADO -->
+                <div class="panel-section" id="player-editor-panel">
+                    <h2 class="section-title">Ficha Seleccionada</h2>
+                    <div class="selected-player-placeholder" id="player-editor-placeholder">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="icon-large"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        <p>Haz clic en un jugador o balón para ver/editar detalles y realizar rotaciones.</p>
+                    </div>
+                    <div class="player-editor-form" id="player-editor-form" style="display: none;">
+                        <div class="player-editor-header">
+                            <div class="player-badge-preview" id="edit-preview-badge">A1</div>
+                            <div class="player-meta-preview">
+                                <h3 id="edit-preview-name">Jugador</h3>
+                                <span id="edit-preview-role">Armador</span>
+                            </div>
+                        </div>
+                        <div class="settings-stack">
+                            <div class="setting-field-row">
+                                <div class="field-half">
+                                    <label for="edit-player-number">Número</label>
+                                    <input type="number" id="edit-player-number" min="1" max="99" class="input-modern">
+                                </div>
+                                <div class="field-half">
+                                    <label for="edit-player-role">Rol</label>
+                                    <select id="edit-player-role" class="select-modern">
+                                        <option value="A">Armador (Setter)</option>
+                                        <option value="P">Punta (Outside)</option>
+                                        <option value="C">Central (Middle)</option>
+                                        <option value="O">Opuesto (Opposite)</option>
+                                        <option value="L">Líbero (Libero)</option>
+                                        <option value="B">Balón (Especial)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="setting-field">
+                                <label for="edit-player-name">Nombre</label>
+                                <input type="text" id="edit-player-name" class="input-modern" maxlength="16">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ROTACIÓN -->
+                <div class="panel-section">
+                    <h2 class="section-title">Rotación de Equipo</h2>
+                    <div class="rotation-bar">
+                        <button id="btn-rotate-clockwise" class="btn btn-secondary btn-full flex-center" title="Rotar en sentido del reloj (Reglamentario)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                            <span>Rotar Posiciones ↻</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- BIBLIOTECA DE TÁCTICAS (MODIFICADO CON TABS Y FAVORITOS) -->
+                <div class="panel-section flex-grow select-tactics-section">
+                    <h2 class="section-title">Sistemas y Tácticas</h2>
+                    
+                    <div class="tabs-modern">
+                        <button class="tab-btn active" data-tab="tab-sistemas">Sistemas</button>
+                        <button class="tab-btn" data-tab="tab-recepcion">Recepción</button>
+                        <button class="tab-btn" data-tab="tab-defensa">Defensa</button>
+                        <button class="tab-btn" data-tab="tab-favoritas" id="tab-btn-favoritas">★ Favoritas</button>
+                    </div>
+
+                    <!-- PESTAÑA 1: SISTEMAS (EXPANDIDA) -->
+                    <div class="tab-content active" id="tab-sistemas">
+                        <ul class="tactics-list">
+                            <!-- Rotaciones 5-1 (1-6) -->
+                            <li class="tactic-card-item">
+                                <button class="tactic-item" data-preset="sistema-5-1-k1">
+                                    <span class="tactic-name">5-1 (Rotación 1)</span>
+                                    <span class="tactic-desc">Armador en Pos. 1 (atrás). Salida triple por 2, 3 y 4.</span>
+                                </button>
+                                <button class="tactic-fav-btn" data-tactic-id="sistema-5-1-k1" title="Favorito">☆</button>
+                            </li>
+                            <li class="tactic-card-item">
+                                <button class="tactic-item" data-preset="sistema-5-1-rot6">
+                                    <span class="tactic-name">5-1 (Rotación 6)</span>
+                                    <span class="tactic-desc">Armador en Pos. 6 (atrás-centro). Cruces rápidos.</span>
+                                </button>
+                                <button class="tactic-fav-btn" data-tactic-id="sistema-5-1-rot6" title="Favorito">☆</button>
+                            </li>
+                            <li class="tactic-card-item">
+                                <button class="tactic-item" data-preset="sistema-5-1-rot5">
+                                    <span class="tactic-name">5-1 (Rotación 5)</span>
+                                    <span class="tactic-desc">Armador en Pos. 5 (atrás-izquierda).</span>
+                                </button>
+                                <button class="tactic-fav-btn" data-tactic-id="sistema-5-1-rot5" title="Favorito">☆</button>
+                            </li>
+                            <li class="tactic-card-item">
+                                <button class="tactic-item" data-preset="sistema-5-1-rot4">
+                                    <span class="tactic-name">5-1 (Rotación 4)</span>
+                                    <span class="tactic-desc">Armador en Pos. 4 (delante-izquierda). Armador en red.</span>
+                                </button>
+                                <button class="tactic-fav-btn" data-tactic-id="sistema-5-1-rot4" title="Favorito">☆</button>
+                            </li>
+                            <li class="tactic-card-item">
+                                <button class="tactic-item" data-preset="sistema-5-1-rot3">
+                                    <span class="tactic-name">5-1 (Rotación 3)</span>
+                                    <span class="tactic-desc">Armador en Pos. 3 (delante-centro).</span>
+                                </button>
+                                <button class="tactic-fav-btn" data-tactic-id="sistema-5-1-rot3" title="Favorito">☆</button>
+                            </li>
+                            <li class="tactic-card-item">
+                                <button class="tactic-item" data-preset="sistema-5-1-k2">
+                                    <span class="tactic-name">5-1 (Rotación 2)</span>
+                                    <span class="tactic-desc">Armador en Pos. 2 (delante-derecha). Salida por 4 y 3.</span>
+                                </button>
+                                <button class="tactic-fav-btn" data-tactic-id="sistema-5-1-k2" title="Favorito">☆</button>
+                            </li>
+                            <!-- Sistemas 6-2 -->
+                            <li class="tactic-card-item">
+                                <button class="tactic-item" data-preset="sistema-6-2">
+                                    <span class="tactic-name">Sistema 6-2 (General)</span>
+                                    <span class="tactic-desc">Armador zaguero penetra, 3 atacantes delanteros constantes.</span>
+                                </button>
+                                <button class="tactic-fav-btn" data-tactic-id="sistema-6-2" title="Favorito">☆</button>
+                            </li>
+                            <!-- Sistemas 4-2 -->
+                            <li class="tactic-card-item">
+                                <button class="tactic-item" data-preset="sistema-4-2">
+                                    <span class="tactic-name">Sistema 4-2 (Z3 Delantero)</span>
+                                    <span class="tactic-desc">Colocador delantero en posición central (Z3).</span>
+                                </button>
+                                <button class="tactic-fav-btn" data-tactic-id="sistema-4-2" title="Favorito">☆</button>
+                            </li>
+                            <li class="tactic-card-item">
+                                <button class="tactic-item" data-preset="sistema-4-2-z2">
+                                    <span class="tactic-name">Sistema 4-2 (Z2 Banda)</span>
+                                    <span class="tactic-desc">Colocador delantero en posición banda derecha (Z2).</span>
+                                </button>
+                                <button class="tactic-fav-btn" data-tactic-id="sistema-4-2-z2" title="Favorito">☆</button>
+                            </li>
+                            <!-- Sistemas Escolares -->
+                            <li class="tactic-card-item">
+                                <button class="tactic-item" data-preset="sistema-3-3">
+                                    <span class="tactic-name">Sistema Escolar 3-3</span>
+                                    <span class="tactic-desc">3 Armadores y 3 Atacantes intercalados. Para iniciación.</span>
+                                </button>
+                                <button class="tactic-fav-btn" data-tactic-id="sistema-3-3" title="Favorito">☆</button>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- PESTAÑA 2: RECEPCIÓN (EXPANDIDA) -->
+                    <div class="tab-content" id="tab-recepcion">
+                        <ul class="tactics-list">
+                            <li class="tactic-card-item">
+                                <button class="tactic-item" data-preset="recep-w">
+                                    <span class="tactic-name">Recepción en "W"</span>
+                                    <span class="tactic-desc">5 receptores en cancha cubriendo espacios de saque.</span>
+                                </button>
+                                <button class="tactic-fav-btn" data-tactic-id="recep-w" title="Favorito">☆</button>
+                            </li>
+                            <li class="tactic-card-item">
+                                <button class="tactic-item" data-preset="recep-4-receptores">
+                                    <span class="tactic-name">Recepción 4 Receptores</span>
+                                    <span class="tactic-desc">4 Receptores liberando al punta delantero de recibir.</span>
+                                </button>
+                                <button class="tactic-fav-btn" data-tactic-id="recep-4-receptores" title="Favorito">☆</button>
+                            </li>
+                            <li class="tactic-card-item">
+                                <button class="tactic-item" data-preset="recep-3-receptores">
+                                    <span class="tactic-name">Recepción 3 Receptores</span>
+                                    <span class="tactic-desc">Esquema profesional: 2 Puntas + Líbero reciben.</span>
+                                </button>
+                                <button class="tactic-fav-btn" data-tactic-id="recep-3-receptores" title="Favorito">☆</button>
+                            </li>
+                            <li class="tactic-card-item">
+                                <button class="tactic-item" data-preset="recep-opuesto-libre">
+                                    <span class="tactic-name">Recepción Opuesto Libre</span>
+                                    <span class="tactic-desc">El Opuesto se ubica cerca de red listo para zaga o banda por 2.</span>
+                                </button>
+                                <button class="tactic-fav-btn" data-tactic-id="recep-opuesto-libre" title="Favorito">☆</button>
+                            </li>
+                            <li class="tactic-card-item">
+                                <button class="tactic-item" data-preset="recep-2-receptores">
+                                    <span class="tactic-name">Recepción 2 Receptores</span>
+                                    <span class="tactic-desc">Esquema moderno arriesgado: Líbero y Punta zaguero cubren cancha.</span>
+                                </button>
+                                <button class="tactic-fav-btn" data-tactic-id="recep-2-receptores" title="Favorito">☆</button>
+                            </li>
+                            <li class="tactic-card-item">
+                                <button class="tactic-item" data-preset="recep-saque-potencia">
+                                    <span class="tactic-name">Recepción Saque Potencia</span>
+                                    <span class="tactic-desc">Líneas de recepción replegadas al fondo de la cancha.</span>
+                                </button>
+                                <button class="tactic-fav-btn" data-tactic-id="recep-saque-potencia" title="Favorito">☆</button>
+                            </li>
+                            <li class="tactic-card-item">
+                                <button class="tactic-item" data-preset="recep-saque-flotante">
+                                    <span class="tactic-name">Recepción Saque Flotante</span>
+                                    <span class="tactic-desc">Líneas de recepción adelantadas para atajar saques cortos.</span>
+                                </button>
+                                <button class="tactic-fav-btn" data-tactic-id="recep-saque-flotante" title="Favorito">☆</button>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- PESTAÑA 3: DEFENSA Y BLOQUEO (EXPANDIDA) -->
+                    <div class="tab-content" id="tab-defensa">
+                        <ul class="tactics-list">
+                            <!-- Defensas de Campo -->
+                            <li class="tactic-card-item">
+                                <button class="tactic-item" data-preset="defensa-perimetro">
+                                    <span class="tactic-name">Defensa Perimetral (3-1-2)</span>
+                                    <span class="tactic-desc">Zagueros en líneas de fondo y bandas. Z6 muy profundo.</span>
+                                </button>
+                                <button class="tactic-fav-btn" data-tactic-id="defensa-perimetro" title="Favorito">☆</button>
+                            </li>
+                            <li class="tactic-card-item">
+                                <button class="tactic-item" data-preset="defensa-diagonal">
+                                    <span class="tactic-name">Defensa Diagonal (3-2-1)</span>
+                                    <span class="tactic-desc">Zaguero Z6 adelantado al centro para defender fintas.</span>
+                                </button>
+                                <button class="tactic-fav-btn" data-tactic-id="defensa-diagonal" title="Favorito">☆</button>
+                            </li>
+                            <!-- Bloqueos Simples -->
+                            <li class="tactic-card-item">
+                                <button class="tactic-item" data-preset="bloqueo-simple-z4">
+                                    <span class="tactic-name">Bloqueo Simple en 4</span>
+                                    <span class="tactic-desc">Punta bloquea extremo izquierdo solo contra remate rival.</span>
+                                </button>
+                                <button class="tactic-fav-btn" data-tactic-id="bloqueo-simple-z4" title="Favorito">☆</button>
+                            </li>
+                            <li class="tactic-card-item">
+                                <button class="tactic-item" data-preset="bloqueo-simple-z3">
+                                    <span class="tactic-name">Bloqueo Simple en 3 (Centro)</span>
+                                    <span class="tactic-desc">Central bloquea ataque rápido central rival.</span>
+                                </button>
+                                <button class="tactic-fav-btn" data-tactic-id="bloqueo-simple-z3" title="Favorito">☆</button>
+                            </li>
+                            <li class="tactic-card-item">
+                                <button class="tactic-item" data-preset="bloqueo-simple-z2">
+                                    <span class="tactic-name">Bloqueo Simple en 2</span>
+                                    <span class="tactic-desc">Opuesto bloquea extremo derecho solo contra punta rival.</span>
+                                </button>
+                                <button class="tactic-fav-btn" data-tactic-id="bloqueo-simple-z2" title="Favorito">☆</button>
+                            </li>
+                            <!-- Bloqueos Dobles -->
+                            <li class="tactic-card-item">
+                                <button class="tactic-item" data-preset="bloqueo-doble">
+                                    <span class="tactic-name">Bloqueo Doble en Z4 (Punta + C)</span>
+                                    <span class="tactic-desc">Punta y Central forman muro en banda izquierda.</span>
+                                </button>
+                                <button class="tactic-fav-btn" data-tactic-id="bloqueo-doble" title="Favorito">☆</button>
+                            </li>
+                            <li class="tactic-card-item">
+                                <button class="tactic-item" data-preset="bloqueo-doble-z2">
+                                    <span class="tactic-name">Bloqueo Doble en Z2 (Opuesto + C)</span>
+                                    <span class="tactic-desc">Opuesto y Central forman muro en banda derecha.</span>
+                                </button>
+                                <button class="tactic-fav-btn" data-tactic-id="bloqueo-doble-z2" title="Favorito">☆</button>
+                            </li>
+                            <!-- Bloqueo Triple -->
+                            <li class="tactic-card-item">
+                                <button class="tactic-item" data-preset="bloqueo-triple">
+                                    <span class="tactic-name">Bloqueo Triple (Muro Completo)</span>
+                                    <span class="tactic-desc">Punta, Central y Opuesto bloquean en el centro juntos.</span>
+                                </button>
+                                <button class="tactic-fav-btn" data-tactic-id="bloqueo-triple" title="Favorito">☆</button>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- PESTAÑA 4: FAVORITAS (NUEVO) -->
+                    <div class="tab-content" id="tab-favoritas">
+                        <ul class="tactics-list" id="favoritas-list">
+                            <div class="empty-state">No tienes tácticas marcadas como preferidas aún. Marca las tácticas con estrella (☆) en las otras pestañas.</div>
+                        </ul>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- MODAL AYUDA / INFORMACIÓN TÁCTICA -->
+    <div class="modal-overlay" id="modal-help" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>Guía de VoleyTactics</h2>
+                <button class="modal-close" id="btn-close-help">&times;</button>
+            </div>
+            <div class="modal-body">
+                <h3>Movimiento de Fichas</h3>
+                <p>Arrastra cualquier jugador (círculos de color) o el balón (círculo amarillo con líneas) a cualquier parte de la cancha.</p>
+                
+                <h3>Roles y Abreviaturas</h3>
+                <ul>
+                    <li><strong style="color: #00bcd4;">A (Armador / Setter):</strong> Dirige el juego ofensivo. Coloca el balón.</li>
+                    <li><strong style="color: #2ed573;">P (Punta Receptor / Outside):</strong> Atacante principal y receptor de saques.</li>
+                    <li><strong style="color: #ffa502;">C (Central / Middle):</strong> Bloqueador principal y atacante rápido en red.</li>
+                    <li><strong style="color: #ffd32a;">O (Opuesto / Opposite):</strong> Atacante de gran potencia desde zaga o red. No recibe.</li>
+                    <li><strong style="color: #ff4757;">L (Líbero):</strong> Especialista defensivo. Solo juega en la zaga (atrás).</li>
+                </ul>
+
+                <h3>Línea de Tiempo y Animación</h3>
+                <ol>
+                    <li>Acomoda a tus jugadores en la posición inicial (Paso 1).</li>
+                    <li>Presiona <strong>"+ Agregar Paso"</strong>. Se creará el Paso 2.</li>
+                    <li>Mueve a los jugadores a sus nuevas posiciones (carreras de ataque, desplazamientos defensivos, pases del balón).</li>
+                    <li>Repite agregando pasos para completar la jugada entera.</li>
+                    <li>Presiona el botón de **Play (▶)** para ver la secuencia animada de forma fluida.</li>
+                </ol>
+
+                <h3>Herramientas de Pizarra</h3>
+                <ul>
+                    <li><strong>Trazo:</strong> Dibuja líneas libres para explicaciones rápidas.</li>
+                    <li><strong>Carrera:</strong> Genera flechas continuas automáticas al trazar con el mouse para indicar movimiento del jugador.</li>
+                    <li><strong>Pase:</strong> Genera flechas discontinuas ideales para indicar pases, saques o remates del balón.</li>
+                    <li><strong>Borrador:</strong> Elimina trazos específicos haciendo clic o arrastrando sobre ellos.</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="btn-help-ok">¡Entendido!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL GUARDAR JUGADA -->
+    <div class="modal-overlay" id="modal-save" style="display: none;">
+        <div class="modal-card modal-card-sm">
+            <div class="modal-header">
+                <h2>Guardar Jugada</h2>
+                <button class="modal-close" id="btn-close-save">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-field">
+                    <label for="input-save-name">Nombre de la Jugada / Estrategia</label>
+                    <input type="text" id="input-save-name" class="input-modern" placeholder="Ej: Recepción 5-1 K1 Cruzado" value="">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btn-save-cancel">Cancelar</button>
+                <button class="btn btn-primary" id="btn-save-confirm">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL INICIO DE SESIÓN / REGISTRO (NUEVO) -->
+    <div class="modal-overlay auth-modal" id="modal-login" style="display: flex;">
+        <div class="modal-card modal-card-sm auth-card">
+            <div class="auth-tabs">
+                <button class="auth-tab-btn active" id="tab-btn-login">Iniciar Sesión</button>
+                <button class="auth-tab-btn" id="tab-btn-register">Registrarse</button>
+            </div>
+            <div class="modal-body auth-modal-body">
+                <!-- FORM INICIAR SESIÓN -->
+                <div class="auth-form-container" id="login-form-container">
+                    <div class="logo-area auth-logo">
+                        <svg class="header-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <circle cx="12" cy="12" r="10" stroke-dasharray="4 2"></circle>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                            <path d="M2 12h20"></path>
+                        </svg>
+                        <h2>Voley<span>Tactics</span></h2>
+                    </div>
+                    <p class="auth-welcome">Inicia sesión para guardar tus tácticas en tu bóveda local de entrenador.</p>
+                    <div class="settings-stack">
+                        <div class="setting-field">
+                            <label for="login-user">Nombre de Usuario</label>
+                            <input type="text" id="login-user" class="input-modern" placeholder="Ej: entrenador_carlos" autocomplete="username">
+                        </div>
+                        <div class="setting-field">
+                            <label for="login-pass">Contraseña</label>
+                            <input type="password" id="login-pass" class="input-modern" placeholder="••••••••" autocomplete="current-password">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-full" id="btn-login-submit" style="margin-top: 20px;">Iniciar Sesión</button>
+                </div>
+
+                <!-- FORM REGISTRO -->
+                <div class="auth-form-container" id="register-form-container" style="display: none;">
+                    <div class="logo-area auth-logo">
+                        <h2>Crear Cuenta</h2>
+                    </div>
+                    <p class="auth-welcome">Regístrate localmente. Tus credenciales se encriptan con seguridad SHA-256 en tu propio navegador.</p>
+                    <div class="settings-stack">
+                        <div class="setting-field">
+                            <label for="register-user">Nombre de Usuario</label>
+                            <input type="text" id="register-user" class="input-modern" placeholder="Mínimo 3 caracteres" autocomplete="username">
+                        </div>
+                        <div class="setting-field">
+                            <label for="register-pass">Contraseña</label>
+                            <input type="password" id="register-pass" class="input-modern" placeholder="Mínimo 4 caracteres" autocomplete="new-password">
+                        </div>
+                        <div class="setting-field">
+                            <label for="register-pass-confirm">Confirmar Contraseña</label>
+                            <input type="password" id="register-pass-confirm" class="input-modern" placeholder="Repite la contraseña" autocomplete="new-password">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-full" id="btn-register-submit" style="margin-top: 20px;">Registrarse</button>
+                </div>
+
+                <!-- ENTRAR COMO INVITADO -->
+                <div class="auth-divider">
+                    <span>O</span>
+                </div>
+                <button class="btn btn-secondary btn-full" id="btn-guest-submit">
+                    <span>Entrar como Invitado</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M5 12h14"></path><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Definición del patrón de red SVG de fondo -->
+    <svg width="0" height="0" style="position: absolute;">
+        <defs>
+            <pattern id="net-pattern" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
+                <rect width="10" height="10" fill="none" />
+                <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#e2e8f0" stroke-width="0.5" />
+                <path d="M 0 10 L 10 10 10 0" fill="none" stroke="#e2e8f0" stroke-width="0.5" />
+            </pattern>
+        </defs>
+    </svg>
+
+    <!-- CARGA DE SCRIPTS -->
+    <script type="module" src="app.js"></script>
+</body>
+</html>
