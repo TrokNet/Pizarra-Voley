@@ -14,3 +14,9 @@ desktop.ini
 
 # Local log files
 *.log
+
+# Python Virtual Environment
+venv/
+__pycache__/
+*.pyc
+
