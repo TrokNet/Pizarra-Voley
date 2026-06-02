@@ -100,7 +100,7 @@ export class TimelineManager {
             name: p.name,
             zone: p.zone
         }));
-        
+
         // Guardar dibujos
         frame.drawings = this.dm.serializeDrawings();
     }

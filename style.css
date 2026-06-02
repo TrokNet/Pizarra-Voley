@@ -185,7 +185,7 @@ input, button, select, textarea {
     background: var(--bg-sidebar);
     backdrop-filter: blur(20px);
     border-color: var(--border-color);
-    width: 320px;
+    width: 290px;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -419,6 +419,11 @@ input, button, select, textarea {
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
+.btn-toggle:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
 /* SELECTS E INPUTS MODERNOS */
 .select-modern, .input-modern {
     background: rgba(0, 0, 0, 0.25);
@@ -599,6 +604,34 @@ input, button, select, textarea {
     font-size: 12px;
 }
 
+.bench-list {
+    background: rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    min-height: 62px;
+    max-height: 140px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.bench-item {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+}
+
+.bench-item:last-child {
+    border-bottom: none;
+}
+
+.bench-item-info {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
 /* ==========================================================================
    WORKSPACE CENTRAL Y VISTA DE CANCHA (COURT CONTAINER)
    ========================================================================== */
@@ -608,7 +641,7 @@ input, button, select, textarea {
     background-color: #0e111a;
     display: flex;
     flex-direction: column;
-    padding: 20px;
+    padding: 16px;
     height: 100%;
     position: relative;
     overflow: hidden;
@@ -622,7 +655,7 @@ input, button, select, textarea {
     position: relative;
     overflow: hidden;
     width: 100%;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
 }
 
 .court-card {
@@ -752,6 +785,14 @@ input, button, select, textarea {
 /* Media cancha */
 .half-court-view .court-zone-out {
     /* La vista se restringe a solo un lado */
+}
+
+.half-court-horizontal {
+    /* Estado explícito para media cancha horizontal (izquierda/derecha). */
+}
+
+.half-court-vertical {
+    /* Estado explícito para media cancha vertical (arriba/abajo). */
 }
 
 /* ==========================================================================
@@ -899,16 +940,23 @@ input, button, select, textarea {
     border: 1px solid var(--border-color);
     border-radius: 16px;
     box-shadow: var(--glass-shadow);
-    padding: 16px 20px;
+    padding: 12px 14px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
 }
 
 .timeline-header {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    gap: 8px;
+    align-items: start;
+}
+
+.timeline-sequence-panel {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .timeline-title-row {
@@ -934,6 +982,7 @@ input, button, select, textarea {
     display: flex;
     align-items: center;
     gap: 8px;
+    flex-wrap: wrap;
 }
 
 .divider-v {
@@ -946,14 +995,14 @@ input, button, select, textarea {
 .timeline-body {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 12px;
     width: 100%;
 }
 
 .frames-container-scroll {
     flex-grow: 1;
     overflow-x: auto;
-    padding: 6px 0;
+    padding: 2px 0;
     display: flex;
 }
 
@@ -1333,6 +1382,10 @@ input, button, select, textarea {
     max-width: 400px;
 }
 
+.modal-card-lg {
+    max-width: 980px;
+}
+
 .modal-header {
     border-bottom: 1px solid var(--border-color);
     padding: 16px 24px;
@@ -1391,12 +1444,162 @@ input, button, select, textarea {
     margin-bottom: 8px;
 }
 
+.help-credit-discreet {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.12);
+}
+
+.help-credit-discreet summary {
+    font-size: 11px;
+    color: var(--text-muted);
+    cursor: pointer;
+    user-select: none;
+    letter-spacing: 0.2px;
+}
+
+.help-credit-discreet p {
+    margin-top: 8px;
+    margin-bottom: 0;
+    font-size: 11px;
+    color: var(--text-muted);
+    opacity: 0.9;
+}
+
 .modal-footer {
     border-top: 1px solid var(--border-color);
     padding: 16px 24px;
     display: flex;
     justify-content: flex-end;
     gap: 12px;
+}
+
+.subs-modal-card {
+    background: radial-gradient(circle at 20% 20%, rgba(79, 70, 229, 0.22), transparent 42%),
+                radial-gradient(circle at 80% 0%, rgba(0, 242, 254, 0.12), transparent 36%),
+                #0f131c;
+    border: 1px solid rgba(129, 140, 248, 0.28);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.58), 0 0 26px rgba(79, 70, 229, 0.2);
+}
+
+.subs-modal-header h2 {
+    letter-spacing: 0.3px;
+}
+
+.subs-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.subs-add-card {
+    background: rgba(0, 0, 0, 0.22);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 14px;
+}
+
+.subs-add-actions {
+    display: flex;
+    align-items: flex-end;
+}
+
+.subs-stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 140px minmax(0, 1fr);
+    gap: 14px;
+    align-items: stretch;
+}
+
+.subs-column {
+    background: rgba(0, 0, 0, 0.22);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.subs-column h3 {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+
+.subs-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 8px;
+    max-height: 250px;
+    overflow-y: auto;
+    padding-right: 2px;
+}
+
+.subs-player-card {
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 9px 10px;
+    background: rgba(255, 255, 255, 0.02);
+    cursor: pointer;
+    flex: 0 0 auto;
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.subs-player-card:hover {
+    transform: translateY(-1px);
+    border-color: rgba(129, 140, 248, 0.55);
+    background: rgba(129, 140, 248, 0.08);
+}
+
+.subs-player-card.active {
+    border-color: #818cf8;
+    background: rgba(99, 102, 241, 0.16);
+    box-shadow: 0 0 0 1px rgba(129, 140, 248, 0.35), 0 0 14px rgba(99, 102, 241, 0.2);
+}
+
+.subs-player-card strong {
+    display: block;
+    font-size: 12px;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.subs-player-card span {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.subs-center-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.subs-swap-btn {
+    width: 120px;
+}
+
+.subs-status {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 1.4;
+    min-height: 30px;
+}
+
+.subs-status.ok {
+    color: #93c5fd;
+}
+
+.subs-status.warn {
+    color: #fca5a5;
 }
 
 /* ==========================================================================
@@ -1446,7 +1649,7 @@ input, button, select, textarea {
 
 @media (max-width: 1280px) {
     .sidebar {
-        width: 280px;
+        width: 260px;
     }
 }
 
@@ -1469,6 +1672,29 @@ input, button, select, textarea {
     
     .main-canvas-area {
         height: 600px;
+    }
+
+    .timeline-header {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .playback-controls {
+        gap: 6px;
+    }
+
+    .subs-stage {
+        grid-template-columns: 1fr;
+    }
+
+    .subs-center-actions {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    .subs-swap-btn {
+        width: auto;
+        min-width: 130px;
     }
 }
 
@@ -1650,6 +1876,16 @@ input, button, select, textarea {
     display: flex;
     flex-direction: column;
     width: 100%;
+}
+
+.auth-credit-discreet {
+    margin-top: 12px;
+    margin-bottom: 0;
+    text-align: center;
+    font-size: 10px;
+    color: var(--text-muted);
+    opacity: 0.55;
+    letter-spacing: 0.2px;
 }
 
 .btn-full {

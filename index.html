@@ -129,6 +129,14 @@
                         </div>
 
                         <div class="setting-field">
+                            <span class="field-label">Orientación de Media Cancha</span>
+                            <div class="toggle-btn-group">
+                                <button id="btn-orientation-horizontal" class="btn btn-toggle active">Horizontal</button>
+                                <button id="btn-orientation-vertical" class="btn btn-toggle">Vertical</button>
+                            </div>
+                        </div>
+
+                        <div class="setting-field">
                             <span class="field-label">Estilo Visual</span>
                             <select id="select-court-style" class="select-modern">
                                 <option value="classic-blue">Clásico FIVB (Azul/Naranja)</option>
@@ -270,29 +278,31 @@
                 <!-- LÍNEA DE TIEMPO -->
                 <div class="timeline-card">
                     <div class="timeline-header">
-                        <div class="timeline-title-row">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon timeline-main-icon"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="3" x2="12" y2="21"></line><line x1="3" y1="12" x2="21" y2="12"></line></svg>
-                            <h3>Secuencia de Jugada (Animación)</h3>
-                        </div>
-                        <div class="playback-controls">
-                            <button id="anim-btn-prev" class="btn btn-icon-small" title="Paso Anterior">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
-                            </button>
-                            <button id="anim-btn-play" class="btn btn-icon-small btn-highlight" title="Reproducir Jugada">
-                                <svg id="icon-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                                <svg id="icon-pause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon" style="display: none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
-                            </button>
-                            <button id="anim-btn-next" class="btn btn-icon-small" title="Siguiente Paso">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
-                            </button>
-                            <div class="divider-v"></div>
-                            <button id="btn-add-frame" class="btn btn-secondary btn-sm" title="Agregar paso nuevo">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                <span>Agregar Paso</span>
-                            </button>
-                            <button id="btn-delete-frame" class="btn btn-danger-outline btn-sm" title="Eliminar paso" disabled>
-                                <span>Eliminar Paso</span>
-                            </button>
+                        <div class="timeline-sequence-panel">
+                            <div class="timeline-title-row">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon timeline-main-icon"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="3" x2="12" y2="21"></line><line x1="3" y1="12" x2="21" y2="12"></line></svg>
+                                <h3>Secuencia de Jugada (Animación)</h3>
+                            </div>
+                            <div class="playback-controls">
+                                <button id="anim-btn-prev" class="btn btn-icon-small" title="Paso Anterior">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
+                                </button>
+                                <button id="anim-btn-play" class="btn btn-icon-small btn-highlight" title="Reproducir Jugada">
+                                    <svg id="icon-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                    <svg id="icon-pause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon" style="display: none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                                </button>
+                                <button id="anim-btn-next" class="btn btn-icon-small" title="Siguiente Paso">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+                                </button>
+                                <div class="divider-v"></div>
+                                <button id="btn-add-frame" class="btn btn-secondary btn-sm" title="Agregar paso nuevo">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                    <span>Agregar Paso</span>
+                                </button>
+                                <button id="btn-delete-frame" class="btn btn-danger-outline btn-sm" title="Eliminar paso" disabled>
+                                    <span>Eliminar Paso</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -626,6 +636,11 @@
                     <li><strong>Pase:</strong> Genera flechas discontinuas ideales para indicar pases, saques o remates del balón.</li>
                     <li><strong>Borrador:</strong> Elimina trazos específicos haciendo clic o arrastrando sobre ellos.</li>
                 </ul>
+
+                <details class="help-credit-discreet">
+                    <summary>Más info</summary>
+                    <p>Creado por Carlos Ledesma (Perú). Programador y NOC. Contacto: +51 961 208 028.</p>
+                </details>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-primary" id="btn-help-ok">¡Entendido!</button>
@@ -716,6 +731,8 @@
                     <span>Entrar como Invitado</span>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M5 12h14"></path><polyline points="12 5 19 12 12 19"></polyline></svg>
                 </button>
+
+                <p class="auth-credit-discreet">Creado por Carlos Ledesma - Peru - Programador y NOC - +51 961 208 028</p>
             </div>
         </div>
     </div>
@@ -732,6 +749,6 @@
     </svg>
 
     <!-- CARGA DE SCRIPTS -->
-    <script type="module" src="app.js"></script>
+    <script type="module" src="app.js?v=20260601-6"></script>
 </body>
 </html>

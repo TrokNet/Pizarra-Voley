@@ -17,7 +17,7 @@ export class PlayerManager {
         this.inputNumber = document.getElementById('edit-player-number');
         this.inputRole = document.getElementById('edit-player-role');
         this.inputName = document.getElementById('edit-player-name');
-        
+
         this.btnRotate = document.getElementById('btn-rotate-clockwise');
         
         this.players = [];
@@ -27,6 +27,15 @@ export class PlayerManager {
         this.draggedElement = null;
         this.dragOffset = { x: 0, y: 0 };
         this.isDragging = false;
+
+        this.dragBounds = {
+            minX: 20,
+            maxX: 980,
+            minY: 20,
+            maxY: 580
+        };
+        this.useRotatedHalf = false;
+        this.currentView = 'full';
         
         this.init();
     }
@@ -39,7 +48,19 @@ export class PlayerManager {
         this.btnRotate.addEventListener('click', () => {
             this.rotateTeamA();
         });
-        
+
+        window.addEventListener('court-view-changed', (e) => {
+            if (e.detail) {
+                this.currentView = e.detail.view || 'full';
+                this.useRotatedHalf = Boolean(e.detail.useRotatedHalf);
+                this.updateTeamVisibilityForView(this.currentView);
+            }
+
+            if (e.detail && e.detail.dragBounds) {
+                this.dragBounds = e.detail.dragBounds;
+            }
+        });
+
         // Deseleccionar al hacer clic en el fondo de la cancha
         this.courtSvg.addEventListener('mousedown', (e) => {
             if (e.target.id === 'court-background' || e.target.id === 'court-playable' || e.target.classList.contains('court-zone-out')) {
@@ -188,9 +209,24 @@ export class PlayerManager {
         // Resuelve las coordenadas locales del SVG escalado
         const svgGlobalMatrix = this.courtSvg.getScreenCTM();
         if (svgGlobalMatrix) {
-            return pt.matrixTransform(svgGlobalMatrix.inverse());
+            const screenPoint = pt.matrixTransform(svgGlobalMatrix.inverse());
+            return this.toLogicalCoords(screenPoint);
         }
-        return { x: clientX, y: clientY };
+        return this.toLogicalCoords({ x: clientX, y: clientY });
+    }
+
+    toLogicalCoords(point) {
+        if (!this.useRotatedHalf) {
+            return point;
+        }
+
+        const centerX = 250;
+        const centerY = 300;
+
+        return {
+            x: centerX - (point.y - centerY),
+            y: centerY + (point.x - centerX)
+        };
     }
 
     /**
@@ -227,8 +263,8 @@ export class PlayerManager {
             if (this.isDragging && this.draggedElement) {
                 e.preventDefault();
                 const coords = this.getSVGCoords(e);
-                const targetX = Math.max(20, Math.min(980, coords.x - this.dragOffset.x));
-                const targetY = Math.max(20, Math.min(580, coords.y - this.dragOffset.y));
+                const targetX = Math.max(this.dragBounds.minX, Math.min(this.dragBounds.maxX, coords.x - this.dragOffset.x));
+                const targetY = Math.max(this.dragBounds.minY, Math.min(this.dragBounds.maxY, coords.y - this.dragOffset.y));
                 
                 // Actualizar visualmente la ficha
                 this.draggedElement.setAttribute('transform', `translate(${targetX}, ${targetY})`);
@@ -374,6 +410,36 @@ export class PlayerManager {
         this.inputName.addEventListener('input', updateCurrentSelected);
     }
 
+    updateTeamVisibilityForView(view) {
+        const isHalfView = view === 'half';
+
+        this.players.forEach((player) => {
+            const shouldHide = isHalfView && player.team === 'red';
+            player.element.style.display = shouldHide ? 'none' : '';
+        });
+
+        if (isHalfView && this.selectedPlayer && this.selectedPlayer.team === 'red') {
+            this.selectPlayer(null);
+        }
+    }
+
+    constrainPlayersToBounds(bounds) {
+        if (!bounds) return;
+
+        this.players.forEach((player) => {
+            const clampedX = Math.max(bounds.minX, Math.min(bounds.maxX, player.x));
+            const clampedY = Math.max(bounds.minY, Math.min(bounds.maxY, player.y));
+
+            if (clampedX !== player.x || clampedY !== player.y) {
+                player.x = clampedX;
+                player.y = clampedY;
+                player.element.setAttribute('transform', `translate(${clampedX}, ${clampedY})`);
+            }
+        });
+
+        window.dispatchEvent(new CustomEvent('player-moved-finished'));
+    }
+
     /**
      * Realiza la rotación reglamentaria de las posiciones del Equipo A (Azul - Local) en sentido horario
      */
@@ -454,4 +520,5 @@ export class PlayerManager {
             }
         }
     }
+
 }

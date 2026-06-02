@@ -1,11 +1,14 @@
 /**
  * VOLEYTACTICS - STORAGE & EXPORT MODULE (js/storage.js)
- * Maneja el almacenamiento en LocalStorage, la exportación/importación JSON y la conversión de SVG a imagen PNG.
+ * Maneja el almacenamiento en IndexedDB, la exportación/importación JSON y la conversión de SVG a imagen PNG.
  */
+
+import { LocalDatabase } from './localdb.js';
 
 export class StorageManager {
     constructor(timelineManager) {
         this.tm = timelineManager;
+        this.db = LocalDatabase.getInstance();
         
         // Buttons
         this.btnSave = document.getElementById('btn-save-play');
@@ -28,28 +31,30 @@ export class StorageManager {
         
         // Estado
         this.currentPlayName = '';
-        const activeUser = localStorage.getItem('voley_tactics_active_session');
-        this.currentUser = activeUser || 'guest';
-        this.storageKey = 'voley_tactics_saved_plays_' + this.currentUser;
+        this.currentUser = 'guest';
         
         this.init();
     }
 
-    init() {
-        this.renderSavedPlaysList();
+    async init() {
+        await this.db.init();
+        const activeUser = await this.db.getActiveSession();
+        this.currentUser = activeUser || 'guest';
+        await this.renderSavedPlaysList();
+        await this.loadLastSavedPlay();
 
         // Escuchar cambios de sesión para reconfigurar el almacenamiento de jugadas
-        window.addEventListener('session-changed', (e) => {
+        window.addEventListener('session-changed', async (e) => {
             const { type, user } = e.detail;
             this.currentUser = user || 'guest';
-            this.storageKey = 'voley_tactics_saved_plays_' + this.currentUser;
             
             if (type === 'logout') {
                 this.createNewPlay();
             } else {
                 this.currentPlayName = '';
                 this.activePlayNameText.textContent = 'Jugada Nueva';
-                this.renderSavedPlaysList();
+                await this.renderSavedPlaysList();
+                await this.loadLastSavedPlay();
             }
         });
         
@@ -65,11 +70,13 @@ export class StorageManager {
         this.btnSaveClose.addEventListener('click', hideSaveModal);
         
         // Confirmar guardar
-        this.btnSaveConfirm.addEventListener('click', () => {
+        this.btnSaveConfirm.addEventListener('click', async () => {
             const name = this.inputSaveName.value.trim();
             if (name) {
-                this.savePlay(name);
-                hideSaveModal();
+                const saved = await this.savePlay(name);
+                if (saved) {
+                    hideSaveModal();
+                }
             }
         });
 
@@ -100,9 +107,22 @@ export class StorageManager {
     }
 
     /**
-     * Guarda la jugada actual en LocalStorage
+     * Guarda la jugada actual en IndexedDB
      */
-    savePlay(name) {
+    async savePlay(name) {
+        const normalizedNewName = name.trim().toLowerCase();
+        const normalizedCurrentName = (this.currentPlayName || '').trim().toLowerCase();
+        const isRenamingCurrentPlay = normalizedCurrentName && normalizedCurrentName === normalizedNewName;
+
+        if (!isRenamingCurrentPlay) {
+            const existingPlay = await this.db.getPlayByName(this.currentUser, name);
+            if (existingPlay) {
+                alert('Ya existe una jugada con ese nombre. Selecciona otro nombre para no sobrescribir.');
+                this.updateSaveStatus('Nombre duplicado: elige otro');
+                return false;
+            }
+        }
+
         this.currentPlayName = name;
         this.activePlayNameText.textContent = name;
         
@@ -112,27 +132,28 @@ export class StorageManager {
             frames: this.tm.serializeTimeline()
         };
 
-        let savedPlays = this.getSavedPlays();
-        
-        // Si ya existe una jugada con este nombre, reemplazarla. Si no, agregarla.
-        const existingIdx = savedPlays.findIndex(p => p.name.toLowerCase() === name.toLowerCase());
-        if (existingIdx !== -1) {
-            savedPlays[existingIdx] = playData;
-        } else {
-            savedPlays.push(playData);
+        await this.db.savePlay(this.currentUser, playData);
+        await this.renderSavedPlaysList();
+        this.updateSaveStatus('Guardado en BD local');
+        return true;
+    }
+
+    async loadLastSavedPlay() {
+        const lastPlay = await this.db.getLastPlayByUser(this.currentUser);
+        if (!lastPlay) {
+            this.createNewPlay();
+            return;
         }
 
-        localStorage.setItem(this.storageKey, JSON.stringify(savedPlays));
-        this.renderSavedPlaysList();
-        this.updateSaveStatus('Guardado en LocalStorage');
+        this.loadPlay(lastPlay);
+        this.updateSaveStatus('Se cargó la última jugada guardada');
     }
 
     /**
-     * Obtiene el listado de jugadas guardadas en LocalStorage
+     * Obtiene el listado de jugadas guardadas en IndexedDB
      */
-    getSavedPlays() {
-        const data = localStorage.getItem(this.storageKey);
-        return data ? JSON.parse(data) : [];
+    async getSavedPlays() {
+        return await this.db.getPlaysByUser(this.currentUser);
     }
 
     /**
@@ -149,12 +170,12 @@ export class StorageManager {
     /**
      * Renderiza la lista lateral de jugadas guardadas
      */
-    renderSavedPlaysList() {
-        const plays = this.getSavedPlays();
+    async renderSavedPlaysList() {
+        const plays = await this.getSavedPlays();
         this.savedPlaysList.innerHTML = '';
 
         if (plays.length === 0) {
-            this.savedPlaysList.innerHTML = '<div class="empty-state">No hay jugadas guardadas localmente.</div>';
+            this.savedPlaysList.innerHTML = '<div class="empty-state">No hay jugadas guardadas en la BD local.</div>';
             return;
         }
 
@@ -188,10 +209,10 @@ export class StorageManager {
             btnDel.title = 'Eliminar jugada';
             btnDel.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`;
             
-            btnDel.addEventListener('click', (e) => {
+            btnDel.addEventListener('click', async (e) => {
                 e.stopPropagation();
                 if (confirm(`¿Estás seguro de que quieres borrar la jugada "${play.name}"?`)) {
-                    this.deletePlay(play.name);
+                    await this.deletePlay(play.name);
                 }
             });
 
@@ -213,17 +234,15 @@ export class StorageManager {
     }
 
     /**
-     * Borra una jugada de LocalStorage
+     * Borra una jugada de IndexedDB
      */
-    deletePlay(name) {
-        let savedPlays = this.getSavedPlays();
-        savedPlays = savedPlays.filter(p => p.name !== name);
-        localStorage.setItem(this.storageKey, JSON.stringify(savedPlays));
+    async deletePlay(name) {
+        await this.db.deletePlay(this.currentUser, name);
         
         if (this.currentPlayName === name) {
             this.createNewPlay();
         } else {
-            this.renderSavedPlaysList();
+            await this.renderSavedPlaysList();
         }
         
         this.updateSaveStatus('Jugada eliminada');

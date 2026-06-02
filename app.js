@@ -3,12 +3,12 @@
  * Orquestador principal de la pizarra de voleibol. Importa los módulos y coordina la lógica global.
  */
 
-import { CourtManager } from './js/court.js';
-import { PlayerManager } from './js/players.js';
-import { DrawingManager } from './js/drawing.js';
-import { TimelineManager } from './js/timeline.js';
-import { StorageManager } from './js/storage.js';
-import { UserManager } from './js/users.js';
+import { CourtManager } from './js/court.js?v=20260602-2';
+import { PlayerManager } from './js/players.js?v=20260602-2';
+import { DrawingManager } from './js/drawing.js?v=20260602-2';
+import { TimelineManager } from './js/timeline.js?v=20260602-2';
+import { StorageManager } from './js/storage.js?v=20260602-2';
+import { UserManager } from './js/users.js?v=20260602-2';
 
 class App {
     constructor() {
@@ -434,7 +434,7 @@ class App {
 
                     // Si hay un trazo de pizarra anterior, limpiarlo para dejar la táctica visible
                     this.drawing.clearAllDrawings();
-                    
+
                     // Forzar guardado inmediato en el frame actual de la timeline
                     this.timeline.saveCurrentStateToFrame();
                     this.storage.updateSaveStatus(`Táctica "${item.querySelector('.tactic-name').textContent}" aplicada`);

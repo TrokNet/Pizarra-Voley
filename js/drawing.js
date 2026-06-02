@@ -24,6 +24,7 @@ export class DrawingManager {
         this.activeTool = 'select'; // 'select', 'draw', 'run', 'pass', 'eraser'
         this.currentColor = '#ff4757'; // Rojo por defecto
         this.currentStrokeWidth = 4;
+        this.useRotatedHalf = false;
         
         // Estado del trazo actual
         this.isDrawing = false;
@@ -43,7 +44,8 @@ export class DrawingManager {
         this.btnClear.addEventListener('click', () => this.clearAllDrawings());
         
         // Escuchar si cambiamos la vista de la cancha para reajustar si fuera necesario
-        window.addEventListener('court-view-changed', () => {
+        window.addEventListener('court-view-changed', (e) => {
+            this.useRotatedHalf = Boolean(e?.detail?.useRotatedHalf);
             // Los dibujos SVG se adaptan solos gracias a la escala del viewBox!
         });
     }
@@ -138,9 +140,24 @@ export class DrawingManager {
         
         const svgGlobalMatrix = this.courtSvg.getScreenCTM();
         if (svgGlobalMatrix) {
-            return pt.matrixTransform(svgGlobalMatrix.inverse());
+            const screenPoint = pt.matrixTransform(svgGlobalMatrix.inverse());
+            return this.toLogicalCoords(screenPoint);
         }
-        return { x: clientX, y: clientY };
+        return this.toLogicalCoords({ x: clientX, y: clientY });
+    }
+
+    toLogicalCoords(point) {
+        if (!this.useRotatedHalf) {
+            return point;
+        }
+
+        const centerX = 250;
+        const centerY = 300;
+
+        return {
+            x: centerX - (point.y - centerY),
+            y: centerY + (point.x - centerX)
+        };
     }
 
     /**

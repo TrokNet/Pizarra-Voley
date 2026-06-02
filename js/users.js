@@ -1,12 +1,13 @@
 /**
  * VOLEYTACTICS - USER MANAGER MODULE (js/users.js)
- * Maneja las cuentas de usuario locales (LocalStorage), cifrado SHA-256, sesiones activas y favoritos.
+ * Maneja las cuentas de usuario en IndexedDB, cifrado SHA-256, sesiones activas y favoritos.
  */
+
+import { LocalDatabase } from './localdb.js';
 
 export class UserManager {
     constructor() {
-        this.usersKey = 'voley_tactics_users';
-        this.sessionKey = 'voley_tactics_active_session';
+        this.db = LocalDatabase.getInstance();
         this.currentUser = null; // null, 'guest', o username
         this.favorites = []; // array de IDs de tácticas preferidas
         
@@ -36,6 +37,7 @@ export class UserManager {
     }
 
     async init() {
+        await this.db.init();
         this.setupAuthModalTabs();
         this.setupAuthListeners();
         
@@ -70,21 +72,6 @@ export class UserManager {
             this.registerForm.style.display = 'flex';
             this.loginForm.style.display = 'none';
         });
-    }
-
-    /**
-     * Obtiene el listado total de usuarios creados localmente
-     */
-    getUsersDatabase() {
-        const data = localStorage.getItem(this.usersKey);
-        return data ? JSON.parse(data) : {};
-    }
-
-    /**
-     * Guarda la base de datos local de usuarios en LocalStorage
-     */
-    saveUsersDatabase(db) {
-        localStorage.setItem(this.usersKey, JSON.stringify(db));
     }
 
     /**
@@ -165,23 +152,22 @@ export class UserManager {
      * Intenta registrar un nuevo usuario
      */
     async register(username, password) {
-        const db = this.getUsersDatabase();
         const normalizedUser = username.toLowerCase();
+        const existingUser = await this.db.getUser(normalizedUser);
 
-        if (db[normalizedUser]) {
+        if (existingUser) {
             alert('El nombre de usuario ya existe. Elige otro.');
             return false;
         }
 
         const hashedPassword = await this.hashPassword(password);
-        db[normalizedUser] = {
+        await this.db.saveUser({
+            id: normalizedUser,
             username: username,
             passwordHash: hashedPassword,
             favorites: [],
             settings: {}
-        };
-
-        this.saveUsersDatabase(db);
+        });
         return true;
     }
 
@@ -189,9 +175,8 @@ export class UserManager {
      * Intenta autenticar a un usuario
      */
     async login(username, password) {
-        const db = this.getUsersDatabase();
         const normalizedUser = username.toLowerCase();
-        const userObj = db[normalizedUser];
+        const userObj = await this.db.getUser(normalizedUser);
 
         if (!userObj) return false;
 
@@ -201,7 +186,7 @@ export class UserManager {
             this.favorites = userObj.favorites || [];
             
             // Guardar sesión activa
-            localStorage.setItem(this.sessionKey, this.currentUser);
+            await this.db.setActiveSession(this.currentUser);
             
             this.applySessionUI();
             this.notifySessionChanged('login');
@@ -214,11 +199,11 @@ export class UserManager {
     /**
      * Inicia sesión temporal como invitado
      */
-    loginAsGuest() {
+    async loginAsGuest() {
         this.currentUser = 'guest';
         this.favorites = [];
         
-        localStorage.setItem(this.sessionKey, 'guest');
+        await this.db.setActiveSession('guest');
         
         this.applySessionUI();
         this.notifySessionChanged('login');
@@ -227,11 +212,11 @@ export class UserManager {
     /**
      * Cierra la sesión activa
      */
-    logout() {
+    async logout() {
         if (confirm('¿Estás seguro de que quieres cerrar la sesión? Tu pizarra táctica se reiniciará.')) {
             this.currentUser = null;
             this.favorites = [];
-            localStorage.removeItem(this.sessionKey);
+            await this.db.clearActiveSession();
             
             this.applySessionUI();
             this.notifySessionChanged('logout');
@@ -239,24 +224,23 @@ export class UserManager {
     }
 
     /**
-     * Carga la sesión activa desde LocalStorage al iniciar
+     * Carga la sesión activa desde IndexedDB al iniciar
      */
     async loadActiveSession() {
-        const active = localStorage.getItem(this.sessionKey);
+        const active = await this.db.getActiveSession();
         
         if (active) {
             if (active === 'guest') {
                 this.currentUser = 'guest';
                 this.favorites = [];
             } else {
-                const db = this.getUsersDatabase();
-                const userObj = db[active.toLowerCase()];
+                const userObj = await this.db.getUser(active.toLowerCase());
                 if (userObj) {
                     this.currentUser = userObj.username;
                     this.favorites = userObj.favorites || [];
                 } else {
                     this.currentUser = null;
-                    localStorage.removeItem(this.sessionKey);
+                    await this.db.clearActiveSession();
                 }
             }
         }
@@ -308,7 +292,7 @@ export class UserManager {
     /**
      * Alterna el estado de favoritos de una táctica específica
      */
-    toggleFavorite(tacticId) {
+    async toggleFavorite(tacticId) {
         if (!this.currentUser) return;
         
         const index = this.favorites.indexOf(tacticId);
@@ -320,11 +304,11 @@ export class UserManager {
 
         // Guardar persistencia en base de datos si no es invitado
         if (this.currentUser !== 'guest') {
-            const db = this.getUsersDatabase();
             const normalizedUser = this.currentUser.toLowerCase();
-            if (db[normalizedUser]) {
-                db[normalizedUser].favorites = this.favorites;
-                this.saveUsersDatabase(db);
+            const userObj = await this.db.getUser(normalizedUser);
+            if (userObj) {
+                userObj.favorites = [...this.favorites];
+                await this.db.saveUser(userObj);
             }
         }
 
