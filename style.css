@@ -1153,6 +1153,54 @@ input, button, select, textarea {
     border-radius: 10px;
 }
 
+#player-editor-panel {
+    padding: 14px 16px;
+    gap: 10px;
+    max-height: 300px;
+    overflow: hidden;
+    transition: max-height 0.25s ease, padding 0.25s ease;
+}
+
+#player-editor-panel .selected-player-placeholder,
+#player-editor-panel .player-editor-form {
+    overflow-y: auto;
+}
+
+#player-editor-panel.collapsed {
+    max-height: 62px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+#player-editor-panel.collapsed #player-editor-placeholder,
+#player-editor-panel.collapsed #player-editor-form {
+    display: none !important;
+}
+
+.panel-toggle-btn {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+}
+
+.panel-toggle-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--border-color-active);
+    background: rgba(99, 102, 241, 0.16);
+}
+
+.panel-toggle-btn:active {
+    transform: translateY(1px);
+}
+
 .selected-player-placeholder p {
     font-size: 12px;
     margin-top: 10px;
@@ -2138,6 +2186,52 @@ input, button, select, textarea {
     flex: 1;
     overflow: hidden;
     margin-top: 15px;
+}
+
+.roster-modal-footer {
+    border-top: 1px solid var(--border-color);
+    padding: 14px 18px 16px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.roster-modal-close-btn {
+    min-width: 170px;
+    border-color: rgba(255, 255, 255, 0.15);
+    background: linear-gradient(180deg, rgba(55, 65, 81, 0.92), rgba(37, 47, 63, 0.92));
+    box-shadow: 0 0 0 rgba(79, 70, 229, 0);
+    position: relative;
+    overflow: hidden;
+}
+
+.roster-modal-close-btn::after {
+    content: '';
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: 6px;
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.85), rgba(0, 242, 254, 0.8), transparent);
+    transform: scaleX(0.35);
+    opacity: 0.6;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.roster-modal-close-btn:hover {
+    border-color: rgba(99, 102, 241, 0.65);
+    background: linear-gradient(180deg, rgba(79, 70, 229, 0.28), rgba(40, 52, 78, 0.95));
+    box-shadow: 0 8px 22px rgba(79, 70, 229, 0.25);
+    transform: translateY(-1px);
+}
+
+.roster-modal-close-btn:hover::after {
+    transform: scaleX(1);
+    opacity: 1;
+}
+
+.roster-modal-close-btn:active {
+    transform: translateY(0);
 }
 
 .roster-list-panel {

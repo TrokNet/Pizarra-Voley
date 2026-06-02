@@ -373,6 +373,9 @@ export class PlayerManager {
         if (!playerId) {
             this.editorPlaceholder.style.display = 'flex';
             this.editorForm.style.display = 'none';
+            window.dispatchEvent(new CustomEvent('player-selection-changed', {
+                detail: { playerId: null }
+            }));
             return;
         }
 
@@ -450,6 +453,10 @@ export class PlayerManager {
                 this.populateRosterSelect(player.role, player.rosterPlayerId || null);
             }
         }
+
+        window.dispatchEvent(new CustomEvent('player-selection-changed', {
+            detail: { playerId: player.id }
+        }));
     }
 
     updatePlayerMetadata(id, name, number, role, rosterPlayerId = null) {

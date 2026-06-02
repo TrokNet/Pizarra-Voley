@@ -4,7 +4,7 @@
  */
 
 import { CourtManager } from './js/court.js?v=20260602-2';
-import { PlayerManager } from './js/players.js?v=20260602-2';
+import { PlayerManager } from './js/players.js?v=20260602-3';
 import { DrawingManager } from './js/drawing.js?v=20260602-2';
 import { TimelineManager } from './js/timeline.js?v=20260602-2';
 import { StorageManager } from './js/storage.js?v=20260602-2';
@@ -35,10 +35,13 @@ class App {
         // 4. Configurar el Sistema de Favoritos y Eventos
         this.setupFavoritesEvents();
 
-        // 5. Configurar el Modal de Ayuda
+        // 5. Comprimir/expandir ficha seleccionada para liberar espacio en tácticas
+        this.setupPlayerEditorPanelToggle();
+
+        // 6. Configurar el Modal de Ayuda
         this.setupHelpModal();
         
-        // 6. Vincular sincronización inicial e interfaz de favoritos
+        // 7. Vincular sincronización inicial e interfaz de favoritos
         this.timeline.saveCurrentStateToFrame();
         this.updateFavoriteStarsUI();
         this.renderFavoritesTab();
@@ -64,6 +67,10 @@ class App {
                 // Mostrar el seleccionado
                 const targetTabId = tab.dataset.tab;
                 document.getElementById(targetTabId).classList.add('active');
+
+                if (targetTabId === 'tab-sistemas' && this.setPlayerEditorCollapsed) {
+                    this.setPlayerEditorCollapsed(true, false);
+                }
             });
         });
     }
@@ -537,6 +544,42 @@ class App {
             });
 
             list.appendChild(clone);
+        });
+    }
+
+    setupPlayerEditorPanelToggle() {
+        const panel = document.getElementById('player-editor-panel');
+        const btnToggle = document.getElementById('btn-toggle-player-editor');
+        if (!panel || !btnToggle) return;
+
+        const storageKey = 'vt-player-editor-collapsed';
+
+        const applyState = (collapsed) => {
+            panel.classList.toggle('collapsed', collapsed);
+            btnToggle.textContent = collapsed ? 'Expandir' : 'Comprimir';
+            btnToggle.setAttribute('aria-expanded', (!collapsed).toString());
+            btnToggle.title = collapsed ? 'Expandir ficha seleccionada' : 'Comprimir ficha seleccionada';
+        };
+
+        this.setPlayerEditorCollapsed = (collapsed, persist = true) => {
+            applyState(collapsed);
+            if (persist) {
+                localStorage.setItem(storageKey, collapsed ? '1' : '0');
+            }
+        };
+
+        const savedState = localStorage.getItem(storageKey) === '1';
+        this.setPlayerEditorCollapsed(savedState, false);
+
+        btnToggle.addEventListener('click', () => {
+            const willCollapse = !panel.classList.contains('collapsed');
+            this.setPlayerEditorCollapsed(willCollapse, true);
+        });
+
+        window.addEventListener('player-selection-changed', (e) => {
+            if (e.detail && e.detail.playerId) {
+                this.setPlayerEditorCollapsed(false, false);
+            }
         });
     }
 

@@ -379,7 +379,10 @@
             <aside class="sidebar sidebar-right" aria-label="Equipos y tácticas predefinidas">
                 <!-- SECCIÓN EDITAR SELECCIONADO -->
                 <div class="panel-section" id="player-editor-panel">
-                    <h2 class="section-title">Ficha Seleccionada</h2>
+                    <div class="section-header-row">
+                        <h2 class="section-title">Ficha Seleccionada</h2>
+                        <button id="btn-toggle-player-editor" class="panel-toggle-btn" type="button" aria-expanded="true" title="Comprimir ficha seleccionada">Comprimir</button>
+                    </div>
                     <div class="selected-player-placeholder" id="player-editor-placeholder">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="icon-large"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                         <p>Haz clic en un jugador o balón para ver/editar detalles y realizar rotaciones.</p>
@@ -810,7 +813,6 @@
         <div class="modal-content glassmorphism roster-modal-content">
             <div class="modal-header">
                 <h2>Plantilla de Jugadores</h2>
-                <button class="btn-close-modal" id="btn-close-roster-modal">&times;</button>
             </div>
             <div class="roster-layout">
                 <!-- Columna Izquierda: Lista de Jugadores Registrados -->
@@ -890,6 +892,11 @@
                     <p>Selecciona un jugador registrado para ver/editar detalles, o crea uno nuevo para incorporarlo a tu plantilla.</p>
                 </div>
             </div>
+            <div class="roster-modal-footer">
+                <button class="btn btn-secondary roster-modal-close-btn" id="btn-close-roster-modal" type="button" title="Terminar edición de plantilla">
+                    Terminar Edición
+                </button>
+            </div>
         </div>
     </div>
 
@@ -905,6 +912,6 @@
     </svg>
 
     <!-- CARGA DE SCRIPTS -->
-    <script type="module" src="app.js?v=20260601-6"></script>
+    <script type="module" src="app.js?v=20260602-6"></script>
 </body>
 </html>
