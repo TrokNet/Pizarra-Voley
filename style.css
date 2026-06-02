@@ -892,7 +892,7 @@ input, button, select, textarea {
 }
 
 .player-token-circle {
-    stroke-width: 4px;
+    stroke-width: 3.5px;
     stroke: #ffffff;
     filter: url(#player-shadow);
     transition: var(--transition-smooth);
@@ -909,55 +909,87 @@ input, button, select, textarea {
 }
 
 .player-token-number {
-    font-family: var(--font-body);
-    font-weight: 600;
-    font-size: 9px;
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 10px;
     text-anchor: middle;
     dominant-baseline: central;
-    fill: rgba(255, 255, 255, 0.7);
+    fill: #ffffff;
     pointer-events: none;
 }
 
 .player-token-label {
-    font-family: var(--font-body);
-    font-weight: 600;
-    font-size: 10px;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 11px;
     text-anchor: middle;
     fill: var(--text-primary);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), 0 0 1px rgba(0, 0, 0, 0.9);
+    pointer-events: none;
+    transition: var(--transition-smooth);
+}
+
+/* Iconos de Rol dentro de la Ficha */
+.player-token-icon-path {
+    stroke: #ffffff;
+    stroke-width: 1.8px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.4));
+    transition: var(--transition-smooth);
+}
+
+/* Badge de Rol (Superscript) */
+.player-token-role-badge circle {
+    fill: #0a0d14;
+    stroke: var(--role-glow, #ffffff);
+    stroke-width: 1.5px;
+    filter: drop-shadow(0 0 3px var(--role-glow, #ffffff));
+    transition: var(--transition-smooth);
+}
+
+.player-token-role-badge-text {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 8px;
+    text-anchor: middle;
+    dominant-baseline: central;
+    fill: #ffffff;
     pointer-events: none;
 }
 
-/* Colores de roles en los tokens */
+/* Estilos específicos y colores neón por Rol */
 .token-role-A .player-token-circle {
-    fill: url(#grad-role-a);
-    stroke: #0a0d14;
-    filter: drop-shadow(0 6px 12px rgba(0, 242, 254, 0.4));
+    fill: #0c0f1a;
+    stroke: var(--role-a);
+    filter: drop-shadow(0 4px 10px rgba(0, 242, 254, 0.25)) drop-shadow(0 0 4px rgba(0, 242, 254, 0.4));
 }
 .token-role-P .player-token-circle {
-    fill: url(#grad-role-p);
-    stroke: #0a0d14;
-    filter: drop-shadow(0 6px 12px rgba(0, 255, 135, 0.4));
+    fill: #0c0f1a;
+    stroke: var(--role-p);
+    filter: drop-shadow(0 4px 10px rgba(0, 255, 135, 0.25)) drop-shadow(0 0 4px rgba(0, 255, 135, 0.4));
 }
 .token-role-C .player-token-circle {
-    fill: url(#grad-role-c);
-    stroke: #0a0d14;
-    filter: drop-shadow(0 6px 12px rgba(255, 159, 67, 0.4));
+    fill: #0c0f1a;
+    stroke: var(--role-c);
+    filter: drop-shadow(0 4px 10px rgba(255, 159, 67, 0.25)) drop-shadow(0 0 4px rgba(255, 159, 67, 0.4));
 }
 .token-role-O .player-token-circle {
-    fill: url(#grad-role-o);
-    stroke: #0a0d14;
-    filter: drop-shadow(0 6px 12px rgba(255, 211, 42, 0.4));
+    fill: #0c0f1a;
+    stroke: var(--role-o);
+    filter: drop-shadow(0 4px 10px rgba(255, 211, 42, 0.25)) drop-shadow(0 0 4px rgba(255, 211, 42, 0.4));
 }
 .token-role-L .player-token-circle {
-    fill: url(#grad-role-l);
-    stroke: #ffffff;
-    filter: drop-shadow(0 6px 12px rgba(255, 118, 117, 0.4));
+    fill: #0c0f1a;
+    stroke: var(--role-l);
+    filter: drop-shadow(0 4px 10px rgba(255, 118, 117, 0.25)) drop-shadow(0 0 4px rgba(255, 118, 117, 0.4));
 }
 
-/* Tokens de Equipo Rojo (Visitante - Alternativo si se requiere o con bordes rojos) */
+/* Fichas del Equipo Rival (Rojo) */
 .team-red .player-token-circle {
-    stroke: var(--danger);
-    stroke-width: 5px;
+    stroke: #ff4757 !important;
+    filter: drop-shadow(0 4px 10px rgba(255, 71, 87, 0.35)) drop-shadow(0 0 5px rgba(255, 71, 87, 0.5)) !important;
 }
 
 /* Ficha del Balón (Especial) */
@@ -966,10 +998,17 @@ input, button, select, textarea {
 }
 
 .player-token.token-ball .player-token-circle {
-    fill: url(#grad-ball);
-    stroke: #ffffff;
+    fill: #0c0f1a;
+    stroke: #ffa502;
     stroke-width: 3px;
-    filter: drop-shadow(0 6px 15px rgba(255, 165, 2, 0.5));
+    filter: drop-shadow(0 4px 12px rgba(255, 165, 2, 0.5)) drop-shadow(0 0 4px rgba(255, 165, 2, 0.4));
+}
+
+.player-token.token-ball path {
+    stroke: #ffa502;
+    stroke-width: 1.8px;
+    filter: drop-shadow(0 0 2px rgba(255, 165, 2, 0.4));
+    transition: var(--transition-smooth);
 }
 
 .player-token.token-ball:hover .player-token-circle {

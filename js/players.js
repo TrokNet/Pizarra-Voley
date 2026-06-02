@@ -147,11 +147,6 @@ export class PlayerManager {
             
             const iconPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             iconPath.setAttribute('class', 'player-token-icon-path');
-            iconPath.setAttribute('fill', 'none');
-            iconPath.setAttribute('stroke', '#ffffff');
-            iconPath.setAttribute('stroke-width', '2');
-            iconPath.setAttribute('stroke-linecap', 'round');
-            iconPath.setAttribute('stroke-linejoin', 'round');
             iconPath.setAttribute('d', this.getRoleIconPath(cfg.role));
             
             iconGroup.appendChild(iconPath);
@@ -166,9 +161,6 @@ export class PlayerManager {
             badgeCircle.setAttribute('cx', '0');
             badgeCircle.setAttribute('cy', '0');
             badgeCircle.setAttribute('r', '7');
-            badgeCircle.setAttribute('fill', '#141a28');
-            badgeCircle.setAttribute('stroke', '#ffffff');
-            badgeCircle.setAttribute('stroke-width', '1.2');
             badge.appendChild(badgeCircle);
             
             const badgeText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
@@ -628,16 +620,16 @@ export class PlayerManager {
      */
     getRoleIconPath(role) {
         const paths = {
-            // A - Armador: Direccional / Cruz de precisión (precisión de colocación)
-            'A': 'M -5 0 L 5 0 M 0 -5 L 0 5 M -3 -3 L 3 3 M -3 3 L 3 -3',
-            // P - Punta: Lightning Bolt / Wings (velocidad y remate por el extremo)
-            'P': 'M 2 -7 L -3 1 L 1 1 L -2 7 L 3 -1 L -1 -1 Z',
-            // C - Central: Escudo táctico (bloqueador/muralla impenetrable)
-            'C': 'M -6 -6 L 6 -6 L 6 -1 C 6 2.5, 0 7.5, 0 7.5 C 0 7.5, -6 2.5, -6 -1 Z',
-            // O - Opuesto: Heavy Attack Flame (potencia de fuego ofensiva)
-            'O': 'M 0 6.5 C 3 6.5, 5 4, 5 1.5 C 5 -1.5, 1.5 -4, 0 -6.5 C -1.5 -4, -5 -1.5, -5 1.5 C -5 4, -3 6.5, 0 6.5 Z',
-            // L - Líbero: Anchored Defense (ancla defensiva y salvamento)
-            'L': 'M 0 -6 L 0 3 M -5 0 C -5 3, -3.5 4.5, 0 4.5 C 3.5 4.5, 5 3, 5 0 M -6.5 -1 L -5 0.5 L -3.5 -1 M 6.5 -1 L 5 0.5 L 3.5 -1',
+            // A - Armador: Manos en copa de colocación debajo de un balón flotando
+            'A': 'M -5 3 C -6 -1, -3 -5, -1 -5 M -5 3 L -3.5 5.5 M 5 3 C 6 -1, 3 -5, 1 -5 M 5 3 L 3.5 5.5 M -2 -8 a 2 2 0 1 0 4 0 a 2 2 0 1 0 -4 0',
+            // P - Punta: Balón rematado que pasa con fuerza sobre la red
+            'P': 'M -8 3 L 8 3 M -5 -5 a 2 2 0 1 0 4 0 a 2 2 0 1 0 -4 0 M -1 -3 L 4 2 M 4 2 L 1 2 M 4 2 L 4 -1',
+            // C - Central: Bloqueo de doble mano en la red deteniendo el balón
+            'C': 'M -9 4 L 9 4 M -4 2 L -4 -4 M -2 3 L -2 -5 M 2 3 L 2 -5 M 4 2 L 4 -4 M -2 -8 a 2 2 0 1 0 4 0 a 2 2 0 1 0 -4 0',
+            // O - Opuesto: Remate de potencia (balón de fuego / meteorito diagonal)
+            'O': 'M 0.5 -3 a 2.5 2.5 0 1 0 5 0 a 2.5 2.5 0 1 0 -5 0 M -5 5 L -1 1 M -3 7 L 1 3 M -7 3 L -3 -1',
+            // L - Líbero: Plataforma de brazos estirados en recepción baja (dig) debajo del balón
+            'L': 'M -6 5 L -2 1 L 2 1 L 6 5 M -2 -3 a 2 2 0 1 0 4 0 a 2 2 0 1 0 -4 0',
             // B - Balón (vacío, maneja su propia simbología)
             'B': ''
         };
