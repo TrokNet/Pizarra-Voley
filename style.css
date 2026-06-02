@@ -186,7 +186,6 @@ input, button, select, textarea {
     backdrop-filter: blur(25px);
     -webkit-backdrop-filter: blur(25px);
     border-color: rgba(255, 255, 255, 0.08);
-    width: 290px;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -198,10 +197,12 @@ input, button, select, textarea {
 
 .sidebar-left {
     border-right: 1px solid rgba(255, 255, 255, 0.08);
+    width: 290px;
 }
 
 .sidebar-right {
     border-left: 1px solid rgba(255, 255, 255, 0.08);
+    width: 330px;
 }
 
 .panel-section {
@@ -257,7 +258,7 @@ input, button, select, textarea {
     gap: 10px;
     padding: 10px 14px;
     font-size: 13px;
-    height: 42px;
+    height: 42px !important;
 }
 
 .tool-grid-sub {
@@ -275,45 +276,7 @@ input, button, select, textarea {
     margin-top: 4px;
 }
 
-.action-btn {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    color: var(--text-secondary);
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 8px 4px;
-    gap: 5px;
-    transition: var(--transition-smooth);
-    font-size: 11px;
-    font-weight: 600;
-}
-
-.action-btn:hover {
-    background: rgba(255, 255, 255, 0.06);
-    color: var(--text-primary);
-    border-color: var(--border-color-active);
-}
-
-.action-btn:active {
-    transform: translateY(1px);
-}
-
-.action-btn.danger:hover {
-    background: rgba(239, 68, 68, 0.15);
-    border-color: var(--danger);
-    color: var(--danger-hover);
-}
-
-.action-btn .icon {
-    width: 16px;
-    height: 16px;
-}
-
-.tool-btn {
+.tool-btn, .action-btn {
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--border-color);
     border-radius: 8px;
@@ -328,12 +291,18 @@ input, button, select, textarea {
     transition: var(--transition-smooth);
     font-size: 11px;
     font-weight: 600;
+    height: 62px;
+    width: 100%;
 }
 
-.tool-btn:hover {
+.tool-btn:hover, .action-btn:hover {
     background: rgba(255, 255, 255, 0.06);
     color: var(--text-primary);
     border-color: var(--border-color-active);
+}
+
+.tool-btn:active, .action-btn:active {
+    transform: translateY(1px);
 }
 
 .tool-btn.active {
@@ -343,13 +312,13 @@ input, button, select, textarea {
     box-shadow: 0 0 15px rgba(79, 70, 229, 0.2);
 }
 
-.tool-btn.danger:hover {
+.action-btn.danger:hover {
     background: rgba(239, 68, 68, 0.15);
     border-color: var(--danger);
     color: var(--danger-hover);
 }
 
-.tool-btn .icon {
+.tool-btn .icon, .action-btn .icon {
     width: 20px;
     height: 20px;
 }
@@ -1056,12 +1025,51 @@ input, button, select, textarea {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    transition: max-height 0.25s ease, padding 0.25s ease;
+    max-height: 220px;
+}
+
+.timeline-card.collapsed {
+    max-height: 52px;
+    padding-bottom: 8px;
+}
+
+.timeline-card.collapsed .timeline-body {
+    display: none !important;
+}
+
+/* Rotate chevron when collapsed */
+.timeline-card.collapsed #btn-toggle-timeline .toggle-chevron {
+    transform: rotate(180deg);
+}
+
+.play-node {
+    background: rgba(79, 70, 229, 0.08) !important;
+    border-color: rgba(79, 70, 229, 0.3) !important;
+    color: #818cf8 !important;
+    flex-shrink: 0;
+    min-width: 90px;
+}
+
+.play-node:hover {
+    background: rgba(79, 70, 229, 0.15) !important;
+    border-color: rgba(79, 70, 229, 0.5) !important;
+    color: #a5b4fc !important;
+}
+
+.play-node.btn-primary {
+    background: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 15px rgba(79, 70, 229, 0.3);
 }
 
 .timeline-header {
     display: flex;
     gap: 8px;
-    align-items: start;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
 }
 
 .timeline-sequence-panel {

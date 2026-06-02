@@ -292,10 +292,12 @@ export class TimelineManager {
         this.saveCurrentStateToFrame();
         this.isPlaying = true;
         
-        // Actualizar iconos estándar
+        // Actualizar iconos estándar y texto
         this.iconPlay.style.display = 'none';
         this.iconPause.style.display = 'block';
         this.btnPlay.classList.add('btn-primary');
+        const playLabel = document.getElementById('play-btn-label');
+        if (playLabel) playLabel.textContent = 'Pausar';
 
         // Actualizar iconos flotantes
         if (this.floatIconPlay && this.floatIconPause) {
@@ -318,10 +320,12 @@ export class TimelineManager {
     stopPlayback() {
         this.isPlaying = false;
         
-        // Actualizar iconos estándar
+        // Actualizar iconos estándar y texto
         this.iconPause.style.display = 'none';
         this.iconPlay.style.display = 'block';
         this.btnPlay.classList.remove('btn-primary');
+        const playLabel = document.getElementById('play-btn-label');
+        if (playLabel) playLabel.textContent = 'Reproducir';
 
         // Actualizar iconos flotantes
         if (this.floatIconPlay && this.floatIconPause) {

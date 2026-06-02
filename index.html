@@ -348,10 +348,6 @@
                                 <button id="anim-btn-prev" class="btn btn-icon-small" title="Paso Anterior">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
                                 </button>
-                                <button id="anim-btn-play" class="btn btn-icon-small btn-highlight" title="Reproducir Jugada">
-                                    <svg id="icon-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                                    <svg id="icon-pause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon" style="display: none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
-                                </button>
                                 <button id="anim-btn-next" class="btn btn-icon-small" title="Siguiente Paso">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
                                 </button>
@@ -365,9 +361,21 @@
                                 </button>
                             </div>
                         </div>
+                        <button id="btn-toggle-timeline" class="panel-toggle-btn" type="button" aria-expanded="true" title="Comprimir secuencia de jugada">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon toggle-chevron"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                        </button>
                     </div>
-
+ 
                     <div class="timeline-body">
+                        <!-- Botón Play/Pause insertado con la misma altura de los nodos de pasos -->
+                        <button id="anim-btn-play" class="frame-node play-node" title="Reproducir / Pausar Animación (Cancha)">
+                            <div class="frame-thumb-voley">
+                                <svg id="icon-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                <svg id="icon-pause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon" style="display: none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                            </div>
+                            <span class="frame-label" id="play-btn-label">Reproducir</span>
+                        </button>
+                        
                         <div class="frames-container-scroll">
                             <div class="frames-track" id="frames-track"></div>
                         </div>

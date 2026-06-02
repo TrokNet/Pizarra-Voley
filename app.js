@@ -37,6 +37,9 @@ class App {
 
         // 5. Comprimir/expandir ficha seleccionada para liberar espacio en tácticas
         this.setupPlayerEditorPanelToggle();
+        
+        // 5b. Comprimir/expandir secuencia de jugada (timeline)
+        this.setupTimelineToggle();
 
         // 6. Configurar el Modal de Ayuda
         this.setupHelpModal();
@@ -559,6 +562,35 @@ class App {
             if (e.detail && e.detail.playerId) {
                 this.setPlayerEditorCollapsed(false, false);
             }
+        });
+    }
+
+    setupTimelineToggle() {
+        const card = document.querySelector('.timeline-card');
+        const btnToggle = document.getElementById('btn-toggle-timeline');
+        if (!card || !btnToggle) return;
+
+        const storageKey = 'vt-timeline-collapsed';
+
+        const applyState = (collapsed) => {
+            card.classList.toggle('collapsed', collapsed);
+            btnToggle.setAttribute('aria-expanded', (!collapsed).toString());
+            btnToggle.title = collapsed ? 'Expandir secuencia de jugada' : 'Comprimir secuencia de jugada';
+        };
+
+        const setTimelineCollapsed = (collapsed, persist = true) => {
+            applyState(collapsed);
+            if (persist) {
+                localStorage.setItem(storageKey, collapsed ? '1' : '0');
+            }
+        };
+
+        const savedState = localStorage.getItem(storageKey) === '1';
+        setTimelineCollapsed(savedState, false);
+
+        btnToggle.addEventListener('click', () => {
+            const willCollapse = !card.classList.contains('collapsed');
+            setTimelineCollapsed(willCollapse, true);
         });
     }
 
