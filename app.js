@@ -409,31 +409,11 @@ class App {
                         const coords = data.players[id];
                         this.players.movePlayerTo(id, coords.x, coords.y, true);
                         
-                        // Si no es el balón, también actualizar el rol y zona del jugador
+                        // Si no es el balón, también actualizar la zona del jugador (manteniendo su nombre, número y rol personalizado)
                         if (id !== 'ball') {
                             const pObj = this.players.players.find(p => p.id === id);
                             if (pObj) {
                                 pObj.zone = coords.zone;
-                                if (coords.role) {
-                                    // Cambiar rol e inyectar visual
-                                    pObj.role = coords.role;
-                                    pObj.number = coords.number;
-                                    pObj.name = coords.name;
-                                    
-                                    const element = pObj.element;
-                                    // Resetear clases de rol
-                                    element.className.baseVal = `player-token team-${pObj.team}`;
-                                    element.classList.add(`token-role-${coords.role}`);
-                                    
-                                    const roleText = element.querySelector('.player-token-text');
-                                    if (roleText) roleText.textContent = coords.role;
-                                    
-                                    const numText = element.querySelector('.player-token-number');
-                                    if (numText) numText.textContent = coords.number;
-                                    
-                                    const nameText = element.querySelector('.player-token-label');
-                                    if (nameText) nameText.textContent = coords.name;
-                                }
                             }
                         }
                     });
