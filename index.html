@@ -73,39 +73,48 @@
                 <div class="panel-section">
                     <h2 class="section-title">Herramientas Tácticas</h2>
                     
-                    <div class="tool-grid">
-                        <button id="tool-select" class="tool-btn active" title="Seleccionar y Mover Fichas">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"></path><path d="M13 13l6 6"></path></svg>
-                            <span>Mover</span>
-                        </button>
-                        <button id="tool-draw" class="tool-btn" title="Dibujar Línea Libre">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                            <span>Trazo</span>
-                        </button>
-                        <button id="tool-arrow-player" class="tool-btn" title="Flecha de Carrera del Jugador (Línea Continua)">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><line x1="5" y1="19" x2="17" y2="7"></line><polyline points="10 7 17 7 17 14"></polyline></svg>
-                            <span>Carrera</span>
-                        </button>
-                        <button id="tool-arrow-ball" class="tool-btn" title="Trayectoria del Balón (Línea Discontinua)">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><line x1="5" y1="19" x2="17" y2="7" stroke-dasharray="3 3"></line><polyline points="10 7 17 7 17 14"></polyline></svg>
-                            <span>Pase</span>
-                        </button>
-                        <button id="tool-eraser" class="tool-btn" title="Borrador de Trazos">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M20 20H7L3 16c-1.5-1.5-1.5-3.5 0-5l8.5-8.5c1.5-1.5 3.5-1.5 5 0l4 4c1.5 1.5 1.5 3.5 0 5L12 20"></path><line x1="6" y1="11" x2="16" y2="20"></line></svg>
-                            <span>Borrar</span>
-                        </button>
-                        <button id="btn-clear-drawings" class="tool-btn danger" title="Limpiar todos los dibujos">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                            <span>Limpiar</span>
-                        </button>
-                        <button id="tool-undo" class="tool-btn" title="Deshacer último trazo (Ctrl+Z)">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>
-                            <span>Deshacer</span>
-                        </button>
-                        <button id="tool-redo" class="tool-btn" title="Rehacer trazo desecho (Ctrl+Y)">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M21 7v6h-6"></path><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"></path></svg>
-                            <span>Rehacer</span>
-                        </button>
+                    <div class="tool-layout-wrapper">
+                        <!-- Herramientas de Dibujo y Movimiento -->
+                        <div class="tool-grid-main">
+                            <button id="tool-select" class="tool-btn active full-width" title="Seleccionar y Mover Fichas">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"></path><path d="M13 13l6 6"></path></svg>
+                                <span>Seleccionar y Mover</span>
+                            </button>
+                            <div class="tool-grid-sub">
+                                <button id="tool-draw" class="tool-btn" title="Dibujar Línea Libre">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                                    <span>Trazo Libre</span>
+                                </button>
+                                <button id="tool-arrow-player" class="tool-btn" title="Flecha de Carrera del Jugador (Línea Continua)">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><line x1="5" y1="19" x2="17" y2="7"></line><polyline points="10 7 17 7 17 14"></polyline></svg>
+                                    <span>Línea Carrera</span>
+                                </button>
+                                <button id="tool-arrow-ball" class="tool-btn" title="Trayectoria del Balón (Línea Discontinua)">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><line x1="5" y1="19" x2="17" y2="7" stroke-dasharray="3 3"></line><polyline points="10 7 17 7 17 14"></polyline></svg>
+                                    <span>Línea Pase</span>
+                                </button>
+                                <button id="tool-eraser" class="tool-btn" title="Borrador de Trazos">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M20 20H7L3 16c-1.5-1.5-1.5-3.5 0-5l8.5-8.5c1.5-1.5 3.5-1.5 5 0l4 4c1.5 1.5 1.5 3.5 0 5L12 20"></path><line x1="6" y1="11" x2="16" y2="20"></line></svg>
+                                    <span>Borrador</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Acciones Rápidas de Pizarra -->
+                        <div class="action-grid">
+                            <button id="tool-undo" class="action-btn" title="Deshacer último trazo (Ctrl+Z)">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>
+                                <span>Deshacer</span>
+                            </button>
+                            <button id="tool-redo" class="action-btn" title="Rehacer trazo desecho (Ctrl+Y)">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon"><path d="M21 7v6h-6"></path><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"></path></svg>
+                                <span>Rehacer</span>
+                            </button>
+                            <button id="btn-clear-drawings" class="action-btn danger" title="Limpiar todos los dibujos">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                <span>Limpiar</span>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- AJUSTES DE DIBUJO -->
@@ -381,7 +390,9 @@
                 <div class="panel-section" id="player-editor-panel">
                     <div class="section-header-row">
                         <h2 class="section-title">Ficha Seleccionada</h2>
-                        <button id="btn-toggle-player-editor" class="panel-toggle-btn" type="button" aria-expanded="true" title="Comprimir ficha seleccionada">Comprimir</button>
+                        <button id="btn-toggle-player-editor" class="panel-toggle-btn" type="button" aria-expanded="true" title="Comprimir ficha seleccionada">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon toggle-chevron"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                        </button>
                     </div>
                     <div class="selected-player-placeholder" id="player-editor-placeholder">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="icon-large"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
@@ -813,6 +824,7 @@
         <div class="modal-content glassmorphism roster-modal-content">
             <div class="modal-header">
                 <h2>Plantilla de Jugadores</h2>
+                <button class="modal-close" id="btn-close-roster-modal-header" title="Cerrar Plantilla">&times;</button>
             </div>
             <div class="roster-layout">
                 <!-- Columna Izquierda: Lista de Jugadores Registrados -->

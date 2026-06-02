@@ -556,7 +556,6 @@ class App {
 
         const applyState = (collapsed) => {
             panel.classList.toggle('collapsed', collapsed);
-            btnToggle.textContent = collapsed ? 'Expandir' : 'Comprimir';
             btnToggle.setAttribute('aria-expanded', (!collapsed).toString());
             btnToggle.title = collapsed ? 'Expandir ficha seleccionada' : 'Comprimir ficha seleccionada';
         };

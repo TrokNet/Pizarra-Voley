@@ -16,6 +16,7 @@ export class RosterManager {
         this.modal = document.getElementById('roster-modal');
         this.btnOpenModal = document.getElementById('btn-roster');
         this.btnCloseModal = document.getElementById('btn-close-roster-modal');
+        this.btnCloseModalHeader = document.getElementById('btn-close-roster-modal-header');
         this.playersListContainer = document.getElementById('roster-players-list');
         this.btnAddPlayer = document.getElementById('btn-add-roster-player');
         
@@ -55,6 +56,9 @@ export class RosterManager {
         }
         if (this.btnCloseModal) {
             this.btnCloseModal.addEventListener('click', () => this.closeModal());
+        }
+        if (this.btnCloseModalHeader) {
+            this.btnCloseModalHeader.addEventListener('click', () => this.closeModal());
         }
         if (this.btnAddPlayer) {
             this.btnAddPlayer.addEventListener('click', () => this.prepareCreateForm());
