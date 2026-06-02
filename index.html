@@ -214,13 +214,6 @@
             <!-- WORKSPACE CENTRAL: PIZARRA Y CANCHA -->
             <main class="main-canvas-area" aria-label="Pizarra táctica interactiva">
                 <div class="court-viewport-container">
-                    <!-- CONTROL FLOTANTE INTERACTIVO DE REPRODUCCIÓN (NUEVO) -->
-                    <div class="court-floating-controls" id="court-floating-controls">
-                        <button id="float-btn-play" class="float-play-btn" title="Reproducir / Pausar Animación (Cancha)">
-                            <svg id="float-icon-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                            <svg id="float-icon-pause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display: none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
-                        </button>
-                    </div>
 
                     <div class="court-card" id="court-card">
                         <!-- CONTENEDOR DE LA CANCHA SVG E INTERACTIVA -->
@@ -347,6 +340,10 @@
                             <div class="playback-controls">
                                 <button id="anim-btn-prev" class="btn btn-icon-small" title="Paso Anterior">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
+                                </button>
+                                <button id="float-btn-play" class="float-play-btn" title="Reproducir / Pausar Animación (Cancha)">
+                                    <svg id="float-icon-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                    <svg id="float-icon-pause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display: none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
                                 </button>
                                 <button id="anim-btn-next" class="btn btn-icon-small" title="Siguiente Paso">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>

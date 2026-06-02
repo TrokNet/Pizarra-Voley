@@ -2212,45 +2212,44 @@ input, button, select, textarea {
     transform: scale(0.96) !important;
 }
 
-/* Controles flotantes interactivos de cancha */
-.court-floating-controls {
-    position: absolute;
-    bottom: 24px;
-    right: 24px;
-    z-index: 15;
-    pointer-events: auto;
-}
-
+/* Controles flotantes de cancha reubicados a la secuencia de jugada */
 .float-play-btn {
-    background: rgba(79, 70, 229, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    width: 56px;
-    height: 56px;
+    background: rgba(79, 70, 229, 0.15);
+    border: 1px solid var(--primary);
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    color: #ffffff;
+    color: #818cf8;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 8px 24px rgba(79, 70, 229, 0.4), 0 0 15px rgba(79, 70, 229, 0.2);
+    box-shadow: 0 0 10px rgba(79, 70, 229, 0.2);
     transition: var(--transition-smooth);
+    padding: 0;
+    flex-shrink: 0;
 }
 
 .float-play-btn:hover {
-    background: rgba(99, 102, 241, 0.95);
-    transform: scale(1.08) translateY(-2px);
-    box-shadow: 0 12px 28px rgba(79, 70, 229, 0.5), 0 0 20px rgba(79, 70, 229, 0.35);
+    background: rgba(79, 70, 229, 0.25);
+    color: #a5b4fc;
+    transform: scale(1.08);
 }
 
 .float-play-btn:active {
-    transform: scale(0.95) translateY(0);
+    transform: scale(0.95);
+}
+
+.float-play-btn.btn-primary {
+    background: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 15px rgba(79, 70, 229, 0.4);
 }
 
 .float-play-btn svg {
-    width: 24px;
-    height: 24px;
+    width: 14px;
+    height: 14px;
     fill: currentColor;
     transition: var(--transition-smooth);
 }
