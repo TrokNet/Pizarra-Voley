@@ -21,6 +21,11 @@ export class TimelineManager {
         this.iconPause = document.getElementById('icon-pause');
         
         this.speedSelect = document.getElementById('select-play-speed');
+
+        // Controles flotantes de reproducción (NUEVO)
+        this.floatBtnPlay = document.getElementById('float-btn-play');
+        this.floatIconPlay = document.getElementById('float-icon-play');
+        this.floatIconPause = document.getElementById('float-icon-pause');
         
         // Estado de la línea de tiempo
         this.frames = [];
@@ -53,6 +58,20 @@ export class TimelineManager {
         window.addEventListener('drawings-changed', () => {
             this.saveCurrentStateToFrame();
         });
+
+        // Si el usuario edita un jugador (nombre, número, rol), guardar el estado en el frame activo
+        window.addEventListener('player-updated', () => {
+            this.saveCurrentStateToFrame();
+        });
+
+        // Vincular select de velocidad a la variable de animación CSS
+        this.speedSelect.addEventListener('change', () => this.updateCSSAnimationSpeed());
+        this.updateCSSAnimationSpeed(); // inicializar
+
+        // Vincular clic del botón flotante
+        if (this.floatBtnPlay) {
+            this.floatBtnPlay.addEventListener('click', () => this.togglePlayback());
+        }
     }
 
     /**
@@ -98,7 +117,8 @@ export class TimelineManager {
             role: p.role,
             number: p.number,
             name: p.name,
-            zone: p.zone
+            zone: p.zone,
+            rosterPlayerId: p.rosterPlayerId || null
         }));
 
         // Guardar dibujos
@@ -169,9 +189,12 @@ export class TimelineManager {
         this.currentFrameIndex = index;
         const frame = this.frames[this.currentFrameIndex];
 
-        // Mover jugadores a las coordenadas del frame
+        // Mover jugadores a las coordenadas del frame y restaurar metadatos (nombre, número, rol y vinculación)
         frame.players.forEach(pData => {
             this.pm.movePlayerTo(pData.id, pData.x, pData.y, animate);
+            if (pData.id !== 'ball') {
+                this.pm.updatePlayerMetadata(pData.id, pData.name, pData.number, pData.role, pData.rosterPlayerId);
+            }
         });
 
         // Cargar los dibujos de este frame
@@ -269,13 +292,20 @@ export class TimelineManager {
         this.saveCurrentStateToFrame();
         this.isPlaying = true;
         
-        // Actualizar iconos
+        // Actualizar iconos estándar
         this.iconPlay.style.display = 'none';
         this.iconPause.style.display = 'block';
         this.btnPlay.classList.add('btn-primary');
 
+        // Actualizar iconos flotantes
+        if (this.floatIconPlay && this.floatIconPause) {
+            this.floatIconPlay.style.display = 'none';
+            this.floatIconPause.style.display = 'block';
+            this.floatBtnPlay.classList.add('btn-primary');
+        }
+ 
         const speed = parseInt(this.speedSelect.value) || 1000;
-
+ 
         // Bucle de reproducción
         this.playInterval = setInterval(() => {
             this.goToNextFrame();
@@ -288,11 +318,18 @@ export class TimelineManager {
     stopPlayback() {
         this.isPlaying = false;
         
-        // Actualizar iconos
+        // Actualizar iconos estándar
         this.iconPause.style.display = 'none';
         this.iconPlay.style.display = 'block';
         this.btnPlay.classList.remove('btn-primary');
 
+        // Actualizar iconos flotantes
+        if (this.floatIconPlay && this.floatIconPause) {
+            this.floatIconPause.style.display = 'none';
+            this.floatIconPlay.style.display = 'block';
+            this.floatBtnPlay.classList.remove('btn-primary');
+        }
+ 
         if (this.playInterval) {
             clearInterval(this.playInterval);
             this.playInterval = null;
@@ -322,5 +359,13 @@ export class TimelineManager {
         this.currentFrameIndex = 0;
         this.renderTimeline();
         this.loadFrame(0, false); // Carga el primer frame sin animación
+    }
+
+    /**
+     * Sincroniza la duración de la animación de los tokens CSS con la velocidad del playback
+     */
+    updateCSSAnimationSpeed() {
+        const speed = parseInt(this.speedSelect.value) || 1000;
+        document.documentElement.style.setProperty('--anim-duration', `${speed}ms`);
     }
 }

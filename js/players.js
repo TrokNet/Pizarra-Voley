@@ -4,7 +4,8 @@
  */
 
 export class PlayerManager {
-    constructor() {
+    constructor(rosterManager = null) {
+        this.roster = rosterManager;
         this.courtSvg = document.getElementById('volleyball-court');
         this.playersGroup = document.getElementById('players-group');
         
@@ -17,6 +18,11 @@ export class PlayerManager {
         this.inputNumber = document.getElementById('edit-player-number');
         this.inputRole = document.getElementById('edit-player-role');
         this.inputName = document.getElementById('edit-player-name');
+
+        // Elementos de Roster
+        this.rosterLinkSection = document.getElementById('roster-link-field');
+        this.selectRosterPlayer = document.getElementById('select-roster-player');
+        this.rosterFilterBadgesContainer = document.getElementById('roster-filter-badges');
 
         this.btnRotate = document.getElementById('btn-rotate-clockwise');
         
@@ -134,12 +140,44 @@ export class PlayerManager {
         g.appendChild(circle);
 
         if (!isBall) {
-            // Texto del Rol (ej. A, P, C, O, L)
-            const textRole = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            textRole.setAttribute('class', 'player-token-text');
-            textRole.setAttribute('y', '-2');
-            textRole.textContent = cfg.role;
-            g.appendChild(textRole);
+            // Grupo del Icono del Rol (NUEVO)
+            const iconGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            iconGroup.setAttribute('class', 'player-token-icon-group');
+            iconGroup.setAttribute('transform', 'translate(0, -6)');
+            
+            const iconPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            iconPath.setAttribute('class', 'player-token-icon-path');
+            iconPath.setAttribute('fill', 'none');
+            iconPath.setAttribute('stroke', '#ffffff');
+            iconPath.setAttribute('stroke-width', '2');
+            iconPath.setAttribute('stroke-linecap', 'round');
+            iconPath.setAttribute('stroke-linejoin', 'round');
+            iconPath.setAttribute('d', this.getRoleIconPath(cfg.role));
+            
+            iconGroup.appendChild(iconPath);
+            g.appendChild(iconGroup);
+
+            // Badge del Rol (Superscript Badge)
+            const badge = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            badge.setAttribute('class', 'player-token-role-badge');
+            badge.setAttribute('transform', 'translate(15, -15)');
+            
+            const badgeCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            badgeCircle.setAttribute('cx', '0');
+            badgeCircle.setAttribute('cy', '0');
+            badgeCircle.setAttribute('r', '7');
+            badgeCircle.setAttribute('fill', '#141a28');
+            badgeCircle.setAttribute('stroke', '#ffffff');
+            badgeCircle.setAttribute('stroke-width', '1.2');
+            badge.appendChild(badgeCircle);
+            
+            const badgeText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            badgeText.setAttribute('class', 'player-token-role-badge-text');
+            badgeText.setAttribute('y', '2.5'); // centrado vertical
+            badgeText.textContent = cfg.role;
+            badge.appendChild(badgeText);
+            
+            g.appendChild(badge);
 
             // Texto del Número (abajo)
             const textNum = document.createElementNS('http://www.w3.org/2000/svg', 'text');
@@ -201,8 +239,8 @@ export class PlayerManager {
      */
     getSVGCoords(e) {
         const pt = this.courtSvg.createSVGPoint();
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const clientX = (e.touches && e.touches.length > 0) ? e.touches[0].clientX : ((e.changedTouches && e.changedTouches.length > 0) ? e.changedTouches[0].clientX : e.clientX);
+        const clientY = (e.touches && e.touches.length > 0) ? e.touches[0].clientY : ((e.changedTouches && e.changedTouches.length > 0) ? e.changedTouches[0].clientY : e.clientY);
         pt.x = clientX;
         pt.y = clientY;
         
@@ -305,6 +343,28 @@ export class PlayerManager {
     /**
      * Selecciona un jugador y muestra sus detalles en el editor lateral
      */
+    populateRosterSelect(filterPos = 'ALL', selectedPlayerId = null) {
+        if (!this.roster) return;
+
+        this.selectRosterPlayer.innerHTML = '';
+        const optDefault = document.createElement('option');
+        optDefault.value = '';
+        optDefault.textContent = '-- Sin Vincular --';
+        this.selectRosterPlayer.appendChild(optDefault);
+
+        const players = this.roster.getPlayersByPosition(filterPos);
+        players.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.id;
+            const posListStr = p.positions.map(pos => pos === p.primaryPosition ? `${pos}★` : pos).join(', ');
+            opt.textContent = `${p.name} (#${p.number}) - [${posListStr}]`;
+            if (p.id === selectedPlayerId) {
+                opt.selected = true;
+            }
+            this.selectRosterPlayer.appendChild(opt);
+        });
+    }
+
     selectPlayer(playerId) {
         // Quitar selección previa
         this.players.forEach(p => p.element.classList.remove('selected'));
@@ -341,6 +401,10 @@ export class PlayerManager {
             this.inputRole.disabled = true;
             this.inputName.value = 'Balón';
             this.inputName.disabled = true;
+
+            if (this.rosterLinkSection) {
+                this.rosterLinkSection.style.display = 'none';
+            }
         } else {
             this.editBadge.textContent = `${player.role}${player.number}`;
             this.editBadge.style.backgroundColor = `var(--role-${player.role.toLowerCase()})`;
@@ -357,6 +421,82 @@ export class PlayerManager {
             this.inputRole.value = player.role;
             this.inputName.disabled = false;
             this.inputName.value = player.name;
+
+            if (this.rosterLinkSection && this.roster) {
+                this.rosterLinkSection.style.display = 'block';
+
+                let linkedRosterPlayer = null;
+                if (player.rosterPlayerId) {
+                    linkedRosterPlayer = this.roster.getAllPlayers().find(p => p.id === player.rosterPlayerId);
+                }
+                
+                if (!linkedRosterPlayer) {
+                    linkedRosterPlayer = this.roster.getAllPlayers().find(p => p.name === player.name && p.number === parseInt(player.number));
+                    if (linkedRosterPlayer) {
+                        player.rosterPlayerId = linkedRosterPlayer.id;
+                    }
+                }
+
+                // Autofiltrar por la posición actual de la ficha
+                const filterButtons = this.rosterFilterBadgesContainer.querySelectorAll('.filter-badge-btn');
+                filterButtons.forEach(btn => {
+                    if (btn.dataset.pos === player.role) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+
+                this.populateRosterSelect(player.role, player.rosterPlayerId || null);
+            }
+        }
+    }
+
+    updatePlayerMetadata(id, name, number, role, rosterPlayerId = null) {
+        const player = this.players.find(p => p.id === id);
+        if (!player || id === 'ball') return;
+
+        const oldRole = player.role;
+        player.name = name || 'Jugador';
+        player.number = parseInt(number) || 1;
+        player.role = role || 'A';
+        player.rosterPlayerId = rosterPlayerId || null;
+
+        const element = player.element;
+        if (element) {
+            // Actualizar clases de rol
+            element.className.baseVal = `player-token team-${player.team}`;
+            element.classList.add(`token-role-${player.role}`);
+            if (this.selectedPlayer && this.selectedPlayer.id === id) {
+                element.classList.add('selected');
+            }
+            
+            // Actualizar textos e iconos internos
+            const iconPath = element.querySelector('.player-token-icon-path');
+            if (iconPath) {
+                iconPath.setAttribute('d', this.getRoleIconPath(player.role));
+            }
+            
+            const badgeText = element.querySelector('.player-token-role-badge-text');
+            if (badgeText) {
+                badgeText.textContent = player.role;
+            }
+
+            const numText = element.querySelector('.player-token-number');
+            if (numText) numText.textContent = player.number;
+
+            const nameText = element.querySelector('.player-token-label');
+            if (nameText) nameText.textContent = player.name;
+        }
+
+        // Si es el seleccionado actualmente, refrescar la previsualización del editor
+        if (this.selectedPlayer && this.selectedPlayer.id === id) {
+            this.editBadge.textContent = `${player.role}${player.number}`;
+            this.editBadge.style.backgroundColor = `var(--role-${player.role.toLowerCase()})`;
+            this.editBadge.style.color = player.role === 'L' ? '#000000' : '#ffffff';
+            this.editName.textContent = player.name;
+            const rolesMap = { A: 'Armador', P: 'Punta Receptor', C: 'Central', O: 'Opuesto', L: 'Líbero' };
+            this.editRoleText.textContent = rolesMap[player.role] || 'Jugador';
         }
     }
 
@@ -381,12 +521,19 @@ export class PlayerManager {
             const element = this.selectedPlayer.element;
             
             // Actualizar clases de rol
-            element.classList.remove(`token-role-${oldRole}`);
+            element.className.baseVal = `player-token team-${this.selectedPlayer.team} selected`;
             element.classList.add(`token-role-${newRole}`);
             
-            // Actualizar textos internos
-            const roleText = element.querySelector('.player-token-text');
-            if (roleText) roleText.textContent = newRole;
+            // Actualizar textos e iconos internos (NUEVO)
+            const iconPath = element.querySelector('.player-token-icon-path');
+            if (iconPath) {
+                iconPath.setAttribute('d', this.getRoleIconPath(newRole));
+            }
+            
+            const badgeText = element.querySelector('.player-token-role-badge-text');
+            if (badgeText) {
+                badgeText.textContent = newRole;
+            }
 
             const numText = element.querySelector('.player-token-number');
             if (numText) numText.textContent = newNum;
@@ -408,6 +555,86 @@ export class PlayerManager {
         this.inputNumber.addEventListener('input', updateCurrentSelected);
         this.inputRole.addEventListener('change', updateCurrentSelected);
         this.inputName.addEventListener('input', updateCurrentSelected);
+
+        // Listeners para vinculación con la plantilla de jugadores (Roster)
+        if (this.roster) {
+            // Escuchar clics en los botones de filtro rápido
+            this.rosterFilterBadgesContainer.addEventListener('click', (e) => {
+                const btn = e.target.closest('.filter-badge-btn');
+                if (!btn) return;
+
+                const filterButtons = this.rosterFilterBadgesContainer.querySelectorAll('.filter-badge-btn');
+                filterButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                const pos = btn.dataset.pos;
+                const currentLink = this.selectRosterPlayer.value;
+                this.populateRosterSelect(pos, currentLink);
+            });
+
+            // Escuchar cambios en la selección de vinculación
+            this.selectRosterPlayer.addEventListener('change', () => {
+                const playerId = this.selectRosterPlayer.value;
+                if (!this.selectedPlayer) return;
+
+                if (!playerId) {
+                    this.selectedPlayer.rosterPlayerId = null;
+                    return;
+                }
+
+                const rosterPlayer = this.roster.getAllPlayers().find(p => p.id === playerId);
+                if (rosterPlayer) {
+                    this.selectedPlayer.rosterPlayerId = rosterPlayer.id;
+                    
+                    // Asignar nombre y número
+                    this.inputName.value = rosterPlayer.name;
+                    this.inputNumber.value = rosterPlayer.number;
+
+                    // Si el filtro activo es una posición válida del jugador, usarla
+                    const activeFilterBtn = this.rosterFilterBadgesContainer.querySelector('.filter-badge-btn.active');
+                    const activePos = activeFilterBtn ? activeFilterBtn.dataset.pos : 'ALL';
+                    
+                    if (activePos !== 'ALL' && rosterPlayer.positions.includes(activePos)) {
+                        this.inputRole.value = activePos;
+                    } else {
+                        this.inputRole.value = rosterPlayer.primaryPosition;
+                    }
+
+                    // Lanzar la actualización
+                    updateCurrentSelected();
+                }
+            });
+
+            // Escuchar si la plantilla cambia
+            window.addEventListener('roster-changed', () => {
+                if (this.selectedPlayer && this.selectedPlayer.id !== 'ball') {
+                    const activeFilterBtn = this.rosterFilterBadgesContainer.querySelector('.filter-badge-btn.active');
+                    const activePos = activeFilterBtn ? activeFilterBtn.dataset.pos : 'ALL';
+                    this.populateRosterSelect(activePos, this.selectedPlayer.rosterPlayerId);
+                }
+            });
+        }
+    }
+
+    /**
+     * Retorna la trayectoria de dibujo vectorial SVG (d) correspondiente al icono de cada rol táctico
+     */
+    getRoleIconPath(role) {
+        const paths = {
+            // A - Armador: Direccional / Cruz de precisión (precisión de colocación)
+            'A': 'M -5 0 L 5 0 M 0 -5 L 0 5 M -3 -3 L 3 3 M -3 3 L 3 -3',
+            // P - Punta: Lightning Bolt / Wings (velocidad y remate por el extremo)
+            'P': 'M 2 -7 L -3 1 L 1 1 L -2 7 L 3 -1 L -1 -1 Z',
+            // C - Central: Escudo táctico (bloqueador/muralla impenetrable)
+            'C': 'M -6 -6 L 6 -6 L 6 -1 C 6 2.5, 0 7.5, 0 7.5 C 0 7.5, -6 2.5, -6 -1 Z',
+            // O - Opuesto: Heavy Attack Flame (potencia de fuego ofensiva)
+            'O': 'M 0 6.5 C 3 6.5, 5 4, 5 1.5 C 5 -1.5, 1.5 -4, 0 -6.5 C -1.5 -4, -5 -1.5, -5 1.5 C -5 4, -3 6.5, 0 6.5 Z',
+            // L - Líbero: Anchored Defense (ancla defensiva y salvamento)
+            'L': 'M 0 -6 L 0 3 M -5 0 C -5 3, -3.5 4.5, 0 4.5 C 3.5 4.5, 5 3, 5 0 M -6.5 -1 L -5 0.5 L -3.5 -1 M 6.5 -1 L 5 0.5 L 3.5 -1',
+            // B - Balón (vacío, maneja su propia simbología)
+            'B': ''
+        };
+        return paths[role] || '';
     }
 
     updateTeamVisibilityForView(view) {
@@ -488,10 +715,11 @@ export class PlayerManager {
             player.element.classList.add('player-animating');
             player.element.setAttribute('transform', `translate(${player.x}, ${player.y})`);
             
-            // Remover la clase de animación después de completar el desplazamiento
+            // Remover la clase de animación después de completar el desplazamiento de manera dinámica
+            const speed = parseInt(document.getElementById('select-play-speed')?.value) || 1000;
             setTimeout(() => {
                 player.element.classList.remove('player-animating');
-            }, 1000);
+            }, speed);
         });
 
         // Seleccionar de nuevo para refrescar la zona en el editor si estaba seleccionado
@@ -514,7 +742,8 @@ export class PlayerManager {
             if (animate) {
                 player.element.classList.add('player-animating');
                 player.element.setAttribute('transform', `translate(${x}, ${y})`);
-                setTimeout(() => player.element.classList.remove('player-animating'), 1000);
+                const speed = parseInt(document.getElementById('select-play-speed')?.value) || 1000;
+                setTimeout(() => player.element.classList.remove('player-animating'), speed);
             } else {
                 player.element.setAttribute('transform', `translate(${x}, ${y})`);
             }

@@ -31,6 +31,10 @@ export class DrawingManager {
         this.activeElement = null;
         this.startPoint = { x: 0, y: 0 };
         this.pointsHistory = []; // Para deshacer (Undo) si es necesario
+
+        // Pila para historial (Undo/Redo)
+        this.undoStack = [[]]; // Estado inicial vacío
+        this.redoStack = [];
         
         this.init();
     }
@@ -48,6 +52,21 @@ export class DrawingManager {
             this.useRotatedHalf = Boolean(e?.detail?.useRotatedHalf);
             // Los dibujos SVG se adaptan solos gracias a la escala del viewBox!
         });
+
+        // Atajos de teclado para deshacer/rehacer (Ctrl+Z y Ctrl+Y)
+        window.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key.toLowerCase() === 'z') {
+                e.preventDefault();
+                this.undo();
+            } else if (e.ctrlKey && e.key.toLowerCase() === 'y') {
+                e.preventDefault();
+                this.redo();
+            }
+        });
+
+        // Botones visuales Undo / Redo
+        document.getElementById('tool-undo').addEventListener('click', () => this.undo());
+        document.getElementById('tool-redo').addEventListener('click', () => this.redo());
     }
 
     /**
@@ -62,7 +81,7 @@ export class DrawingManager {
                 
                 // Activar la seleccionada
                 btn.classList.add('active');
-                this.activeTool = btn.id.replace('tool-', '');
+                this.activeTool = toolName;
                 
                 // Si es borrador, cambiamos estilo en la cancha para cursor y hover
                 if (this.activeTool === 'eraser') {
@@ -133,8 +152,8 @@ export class DrawingManager {
      */
     getSVGCoords(e) {
         const pt = this.courtSvg.createSVGPoint();
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const clientX = (e.touches && e.touches.length > 0) ? e.touches[0].clientX : ((e.changedTouches && e.changedTouches.length > 0) ? e.changedTouches[0].clientX : e.clientX);
+        const clientY = (e.touches && e.touches.length > 0) ? e.touches[0].clientY : ((e.changedTouches && e.changedTouches.length > 0) ? e.changedTouches[0].clientY : e.clientY);
         pt.x = clientX;
         pt.y = clientY;
         
@@ -165,8 +184,8 @@ export class DrawingManager {
      */
     setupDrawingListeners() {
         const startDraw = (e) => {
-            // Evitar dibujar si hacemos clic en una ficha o si la herramienta activa es "Mover" (select)
-            if (e.target.closest('.player-token') || this.activeTool === 'select') {
+            // Evitar dibujar si la herramienta activa es "Mover" (select)
+            if (this.activeTool === 'select') {
                 return;
             }
 
@@ -175,6 +194,7 @@ export class DrawingManager {
                 const targetDrawing = e.target.closest('#tactical-drawings-group path, #tactical-drawings-group line, #tactical-drawings-group g');
                 if (targetDrawing) {
                     targetDrawing.remove();
+                    this.saveStateToHistory();
                     this.notifyDrawingsChanged();
                 }
                 return;
@@ -182,7 +202,28 @@ export class DrawingManager {
 
             e.preventDefault();
             this.isDrawing = true;
-            const coords = this.getSVGCoords(e);
+
+            // Detectar si el clic inicial fue sobre un token de jugador o balón
+            const tokenElement = e.target.closest('.player-token');
+            let coords;
+            if (tokenElement) {
+                // Iniciar el trazo exactamente en el centro de su posición usando translate
+                const transform = tokenElement.getAttribute('transform');
+                if (transform) {
+                    const match = transform.match(/translate\(([^,)]+),?\s*([^)]*)\)/);
+                    if (match) {
+                        coords = {
+                            x: parseFloat(match[1]),
+                            y: parseFloat(match[2])
+                        };
+                    }
+                }
+            }
+
+            if (!coords) {
+                coords = this.getSVGCoords(e);
+            }
+
             this.startPoint = { x: coords.x, y: coords.y };
 
             if (this.activeTool === 'draw') {
@@ -252,7 +293,7 @@ export class DrawingManager {
             }
         };
 
-        const stopDraw = () => {
+        const stopDraw = (e) => {
             if (this.isDrawing) {
                 this.isDrawing = false;
                 
@@ -260,6 +301,28 @@ export class DrawingManager {
                 if (this.activeTool === 'run' || this.activeTool === 'pass') {
                     const line = this.activeElement.querySelector('line');
                     if (line) {
+                        // Comprobar si soltamos sobre otro token de jugador para encajar el final
+                        if (e) {
+                            const clientX = (e.touches && e.touches.length > 0) ? e.touches[0].clientX : ((e.changedTouches && e.changedTouches.length > 0) ? e.changedTouches[0].clientX : e.clientX);
+                            const clientY = (e.touches && e.touches.length > 0) ? e.touches[0].clientY : ((e.changedTouches && e.changedTouches.length > 0) ? e.changedTouches[0].clientY : e.clientY);
+                            
+                            if (clientX !== undefined && clientY !== undefined) {
+                                const targetEl = document.elementFromPoint(clientX, clientY);
+                                const endToken = targetEl ? targetEl.closest('.player-token') : null;
+                                
+                                if (endToken) {
+                                    const transform = endToken.getAttribute('transform');
+                                    if (transform) {
+                                        const match = transform.match(/translate\(([^,)]+),?\s*([^)]*)\)/);
+                                        if (match) {
+                                            line.setAttribute('x2', parseFloat(match[1]));
+                                            line.setAttribute('y2', parseFloat(match[2]));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
                         const x1 = parseFloat(line.getAttribute('x1'));
                         const y1 = parseFloat(line.getAttribute('y1'));
                         const x2 = parseFloat(line.getAttribute('x2'));
@@ -273,6 +336,7 @@ export class DrawingManager {
                 }
                 
                 this.activeElement = null;
+                this.saveStateToHistory();
                 this.notifyDrawingsChanged();
             }
         };
@@ -284,6 +348,7 @@ export class DrawingManager {
                 const pathEl = e.target.closest('path, line, g');
                 if (pathEl) {
                     pathEl.remove();
+                    this.saveStateToHistory();
                     this.notifyDrawingsChanged();
                 }
             }
@@ -304,8 +369,13 @@ export class DrawingManager {
      * Limpia completamente todos los dibujos de la pizarra
      */
     clearAllDrawings() {
-        this.drawingsGroup.innerHTML = '';
+        this.clearAllDrawingsWithoutHistory();
+        this.saveStateToHistory();
         this.notifyDrawingsChanged();
+    }
+
+    clearAllDrawingsWithoutHistory() {
+        this.drawingsGroup.innerHTML = '';
     }
 
     /**
@@ -356,9 +426,15 @@ export class DrawingManager {
     /**
      * Reconstruye los dibujos a partir de datos serializados JSON (para cargar)
      */
-    deserializeDrawings(drawingsData) {
-        this.clearAllDrawings();
-        if (!drawingsData || !Array.isArray(drawingsData)) return;
+    deserializeDrawings(drawingsData, preserveHistory = false) {
+        this.clearAllDrawingsWithoutHistory();
+        if (!drawingsData || !Array.isArray(drawingsData)) {
+            if (!preserveHistory) {
+                this.undoStack = [[]];
+                this.redoStack = [];
+            }
+            return;
+        }
 
         drawingsData.forEach(data => {
             if (data.type === 'path') {
@@ -393,5 +469,68 @@ export class DrawingManager {
                 this.drawingsGroup.appendChild(group);
             }
         });
+
+        if (!preserveHistory) {
+            this.undoStack = [this.serializeDrawings()];
+            this.redoStack = [];
+        }
+    }
+
+    /**
+     * Registra un nuevo estado táctico en la pila de deshacer
+     */
+    saveStateToHistory() {
+        const state = this.serializeDrawings();
+        
+        // Evitar duplicados idénticos consecutivos en la pila
+        if (this.undoStack.length > 0) {
+            const lastState = this.undoStack[this.undoStack.length - 1];
+            if (JSON.stringify(lastState) === JSON.stringify(state)) {
+                return;
+            }
+        }
+        
+        this.undoStack.push(state);
+        if (this.undoStack.length > 50) {
+            this.undoStack.shift();
+        }
+        
+        // Al dibujar algo nuevo, vaciar la pila de rehacer
+        this.redoStack = [];
+    }
+
+    /**
+     * Deshace la última acción táctica de dibujo
+     */
+    undo() {
+        if (this.undoStack.length <= 1) {
+            console.log('Historial vacío: nada que deshacer.');
+            return;
+        }
+        
+        const currentState = this.undoStack.pop();
+        this.redoStack.push(currentState);
+        
+        const prevState = this.undoStack[this.undoStack.length - 1];
+        this.deserializeDrawings(prevState, true);
+        
+        this.notifyDrawingsChanged();
+    }
+
+    /**
+     * Rehace el dibujo previamente deshecho
+     */
+    redo() {
+        if (this.redoStack.length === 0) {
+            console.log('Nada que rehacer.');
+            return;
+        }
+        
+        const nextState = this.redoStack.pop();
+        this.undoStack.push(nextState);
+        
+        this.deserializeDrawings(nextState, true);
+        
+        this.notifyDrawingsChanged();
     }
 }

@@ -9,6 +9,7 @@ import { DrawingManager } from './js/drawing.js?v=20260602-2';
 import { TimelineManager } from './js/timeline.js?v=20260602-2';
 import { StorageManager } from './js/storage.js?v=20260602-2';
 import { UserManager } from './js/users.js?v=20260602-2';
+import { RosterManager } from './js/roster.js?v=20260602-2';
 
 class App {
     constructor() {
@@ -19,7 +20,8 @@ class App {
         // 1. Instanciar Módulos Fundacionales y Gestión de Sesión
         this.users = new UserManager();
         this.court = new CourtManager();
-        this.players = new PlayerManager();
+        this.roster = new RosterManager();
+        this.players = new PlayerManager(this.roster);
         this.drawing = new DrawingManager();
         this.timeline = new TimelineManager(this.players, this.drawing);
         this.storage = new StorageManager(this.timeline);

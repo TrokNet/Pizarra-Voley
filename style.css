@@ -36,7 +36,6 @@
     --role-l: #ff7675;     /* Líbero (Rosa) */
     --role-b: #ffffff;     /* Balón (Especial) */
 
-    /* Fuentes */
     --font-heading: 'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif;
     --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
     
@@ -48,6 +47,7 @@
     --neon-shadow-o: 0 0 12px rgba(255, 211, 42, 0.5);
     --neon-shadow-l: 0 0 12px rgba(255, 118, 117, 0.5);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --anim-duration: 1000ms;
 }
 
 /* ==========================================================================
@@ -182,9 +182,10 @@ input, button, select, textarea {
 }
 
 .sidebar {
-    background: var(--bg-sidebar);
-    backdrop-filter: blur(20px);
-    border-color: var(--border-color);
+    background: rgba(13, 17, 27, 0.65);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border-color: rgba(255, 255, 255, 0.08);
     width: 290px;
     height: 100%;
     display: flex;
@@ -196,11 +197,11 @@ input, button, select, textarea {
 }
 
 .sidebar-left {
-    border-right: 1px solid var(--border-color);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .sidebar-right {
-    border-left: 1px solid var(--border-color);
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .panel-section {
@@ -659,9 +660,10 @@ input, button, select, textarea {
 }
 
 .court-card {
-    background: var(--bg-card);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--border-color);
+    background: rgba(20, 26, 40, 0.45);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 16px;
     box-shadow: var(--glass-shadow);
     padding: 10px;
@@ -799,10 +801,11 @@ input, button, select, textarea {
    DIBUJOS TÁCTICOS (TACTICAL DRAWINGS OVERLAY)
    ========================================================================== */
 
-#tactical-drawings-group path, #tactical-drawings-group line {
+#tactical-drawings-group path, #tactical-drawings-group line, #tactical-drawings-group g {
     pointer-events: visibleStroke;
     cursor: default;
-    transition: stroke-width 0.1s ease;
+    transition: stroke-width 0.15s ease;
+    animation: fadeInDraw 0.4s ease-out forwards;
 }
 
 #tactical-drawings-group path:hover, #tactical-drawings-group line:hover {
@@ -814,6 +817,27 @@ input, button, select, textarea {
     cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ff4757' stroke-width='3'%3E%3Cpath d='M20 20H7L3 16c-1.5-1.5-1.5-3.5 0-5l8.5-8.5c1.5-1.5 3.5-1.5 5 0l4 4c1.5 1.5 1.5 3.5 0 5L12 20'/%3E%3C/svg%3E") 2 15, auto;
     stroke: var(--danger) !important;
     opacity: 0.6;
+}
+
+/* Animación de flujo para las trayectorias del balón (pase) */
+#tactical-drawings-group g[data-tool="pass"] line {
+    stroke-dasharray: 8 6;
+    animation: dashFlow 1.2s linear infinite;
+}
+
+@keyframes dashFlow {
+    to {
+        stroke-dashoffset: -28;
+    }
+}
+
+@keyframes fadeInDraw {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 /* ==========================================================================
@@ -868,29 +892,29 @@ input, button, select, textarea {
 
 /* Colores de roles en los tokens */
 .token-role-A .player-token-circle {
-    fill: var(--role-a);
+    fill: url(#grad-role-a);
     stroke: #0a0d14;
-    filter: drop-shadow(0 4px 8px rgba(0, 242, 254, 0.45));
+    filter: drop-shadow(0 6px 12px rgba(0, 242, 254, 0.4));
 }
 .token-role-P .player-token-circle {
-    fill: var(--role-p);
+    fill: url(#grad-role-p);
     stroke: #0a0d14;
-    filter: drop-shadow(0 4px 8px rgba(0, 255, 135, 0.45));
+    filter: drop-shadow(0 6px 12px rgba(0, 255, 135, 0.4));
 }
 .token-role-C .player-token-circle {
-    fill: var(--role-c);
+    fill: url(#grad-role-c);
     stroke: #0a0d14;
-    filter: drop-shadow(0 4px 8px rgba(255, 159, 67, 0.45));
+    filter: drop-shadow(0 6px 12px rgba(255, 159, 67, 0.4));
 }
 .token-role-O .player-token-circle {
-    fill: var(--role-o);
+    fill: url(#grad-role-o);
     stroke: #0a0d14;
-    filter: drop-shadow(0 4px 8px rgba(255, 211, 42, 0.45));
+    filter: drop-shadow(0 6px 12px rgba(255, 211, 42, 0.4));
 }
 .token-role-L .player-token-circle {
-    fill: var(--role-l);
+    fill: url(#grad-role-l);
     stroke: #ffffff;
-    filter: drop-shadow(0 4px 8px rgba(255, 118, 117, 0.45));
+    filter: drop-shadow(0 6px 12px rgba(255, 118, 117, 0.4));
 }
 
 /* Tokens de Equipo Rojo (Visitante - Alternativo si se requiere o con bordes rojos) */
@@ -905,29 +929,49 @@ input, button, select, textarea {
 }
 
 .player-token.token-ball .player-token-circle {
-    fill: #ffa502;
+    fill: url(#grad-ball);
     stroke: #ffffff;
     stroke-width: 3px;
-    filter: url(#ball-shadow);
+    filter: drop-shadow(0 6px 15px rgba(255, 165, 2, 0.5));
 }
 
 .player-token.token-ball:hover .player-token-circle {
     transform: scale(1.1);
-    fill: #ffb142;
 }
 
 /* Ficha seleccionada (Efecto neón pulsante) */
+.token-role-A { --role-glow: #00f2fe; }
+.token-role-P { --role-glow: #00ff87; }
+.token-role-C { --role-glow: #ff9f43; }
+.token-role-O { --role-glow: #ffd32a; }
+.token-role-L { --role-glow: #ff7675; }
+.token-ball { --role-glow: #ffa502; }
+
+/* Ficha seleccionada (Efecto neón pulsante con halo exterior dinámico) */
 .player-token.selected .player-token-circle {
     stroke: #ffffff;
     stroke-width: 6px;
-    animation: pulse-border 1.5s infinite alternate;
+    animation: selectedPulse 1.5s infinite ease-in-out;
 }
 
-/* Animación para fichas en movimiento (Timeline) */
+@keyframes selectedPulse {
+    0% {
+        filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.6)) drop-shadow(0 4px 10px rgba(0,0,0,0.5));
+        stroke-width: 5px;
+    }
+    50% {
+        filter: drop-shadow(0 0 16px var(--role-glow, #ffffff)) drop-shadow(0 4px 10px rgba(0,0,0,0.5));
+        stroke-width: 7px;
+    }
+    100% {
+        filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.6)) drop-shadow(0 4px 10px rgba(0,0,0,0.5));
+        stroke-width: 5px;
+    }
+}
+
+/* Animación para fichas en movimiento (Timeline) vinculada a velocidad */
 .player-animating {
-    transition: transform 1s cubic-bezier(0.25, 0.8, 0.25, 1), 
-                cx 1s cubic-bezier(0.25, 0.8, 0.25, 1), 
-                cy 1s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+    transition: transform var(--anim-duration) cubic-bezier(0.25, 0.8, 0.25, 1) !important;
 }
 
 /* ==========================================================================
@@ -1034,9 +1078,32 @@ input, button, select, textarea {
 }
 
 .frame-node.active {
-    background: rgba(79, 70, 229, 0.15);
-    border-color: var(--primary);
-    box-shadow: 0 0 15px rgba(79, 70, 229, 0.15);
+    background: rgba(79, 70, 229, 0.18);
+    border-color: transparent;
+    box-shadow: 0 0 20px rgba(79, 70, 229, 0.25);
+    position: relative;
+}
+
+.frame-node.active::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 10px;
+    padding: 1px;
+    background: linear-gradient(135deg, #4f46e5, #00f2fe, #4f46e5);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    background-size: 200% 200%;
+    animation: borderGradiant 3s linear infinite;
+}
+
+@keyframes borderGradiant {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 .frame-thumb-voley {
@@ -1992,4 +2059,323 @@ input, button, select, textarea {
 .play-item-delete:hover {
     color: var(--danger-hover);
     background: rgba(239, 68, 68, 0.15);
+}
+
+/* ==========================================================================
+   INTERACTIVIDAD ADICIONAL Y MICRO-ANIMACIONES ACTIVO/BOUNCY
+   ========================================================================== */
+
+.btn:active, 
+.btn-icon:active, 
+.btn-icon-small:active, 
+.tool-btn:active, 
+.tactic-item:active, 
+.tactic-fav-btn:active, 
+.play-list-item:active, 
+.frame-node:active {
+    transform: scale(0.96) !important;
+}
+
+/* Controles flotantes interactivos de cancha */
+.court-floating-controls {
+    position: absolute;
+    bottom: 24px;
+    right: 24px;
+    z-index: 15;
+    pointer-events: auto;
+}
+
+.float-play-btn {
+    background: rgba(79, 70, 229, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(79, 70, 229, 0.4), 0 0 15px rgba(79, 70, 229, 0.2);
+    transition: var(--transition-smooth);
+}
+
+.float-play-btn:hover {
+    background: rgba(99, 102, 241, 0.95);
+    transform: scale(1.08) translateY(-2px);
+    box-shadow: 0 12px 28px rgba(79, 70, 229, 0.5), 0 0 20px rgba(79, 70, 229, 0.35);
+}
+
+.float-play-btn:active {
+    transform: scale(0.95) translateY(0);
+}
+
+.float-play-btn svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+    transition: var(--transition-smooth);
+}
+
+/* ==========================================================================
+   PLANTILLA DE JUGADORES (ROSTER MODAL & EDITOR LINKING)
+   ========================================================================== */
+
+.roster-modal-content {
+    max-width: 900px !important;
+    width: 90% !important;
+    height: 80vh !important;
+    max-height: 650px !important;
+    display: flex;
+    flex-direction: column;
+}
+
+.roster-layout {
+    display: flex;
+    gap: 20px;
+    flex: 1;
+    overflow: hidden;
+    margin-top: 15px;
+}
+
+.roster-list-panel {
+    flex: 1.3;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 15px;
+}
+
+.roster-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.roster-panel-header h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.roster-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 5px;
+}
+
+.roster-list::-webkit-scrollbar {
+    width: 6px;
+}
+.roster-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.01);
+}
+.roster-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.roster-player-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 12px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.roster-player-item:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateX(3px);
+}
+
+.roster-player-item.active {
+    background: rgba(79, 70, 229, 0.15);
+    border-color: var(--primary);
+    box-shadow: 0 0 15px rgba(79, 70, 229, 0.2);
+}
+
+.roster-player-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.roster-player-number-badge {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.roster-player-name-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.roster-player-positions {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.roster-pos-badge {
+    font-size: 9px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #ffffff;
+    text-transform: uppercase;
+}
+
+.roster-pos-badge.badge-a { background: var(--role-a); }
+.roster-pos-badge.badge-p { background: var(--role-p); }
+.roster-pos-badge.badge-c { background: var(--role-c); }
+.roster-pos-badge.badge-o { background: var(--role-o); }
+.roster-pos-badge.badge-l { background: var(--role-l); color: #000000; }
+
+.roster-pos-badge.favorite {
+    border: 1px solid #ffd700;
+    box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+    position: relative;
+    padding-right: 14px;
+}
+
+.roster-pos-badge.favorite::after {
+    content: "★";
+    position: absolute;
+    right: 3px;
+    top: 1px;
+    color: #ffd700;
+    font-size: 8px;
+}
+
+.roster-editor-panel {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow-y: auto;
+}
+
+.roster-editor-panel h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 15px;
+}
+
+.roster-positions-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.roster-positions-container .checkbox-container {
+    font-size: 13px;
+    margin-bottom: 0;
+}
+
+.roster-form-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.roster-form-actions .btn {
+    flex: 1;
+}
+
+.roster-editor-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: var(--text-secondary);
+    opacity: 0.7;
+    padding: 20px;
+    border: 1px dashed var(--border-color);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.01);
+}
+
+.roster-editor-empty p {
+    font-size: 13px;
+    line-height: 1.5;
+    margin-top: 10px;
+}
+
+/* Filtrado de Roster en Editor */
+.editor-roster-link-section {
+    padding-top: 5px;
+}
+
+.editor-divider {
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    margin: 15px 0;
+}
+
+.roster-filter-badges {
+    display: flex;
+    gap: 5px;
+    margin-top: 6px;
+    margin-bottom: 10px;
+}
+
+.filter-badge-btn {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 6px 0;
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.filter-badge-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+    border-color: var(--border-color-active);
+}
+
+.filter-badge-btn.active {
+    background: rgba(79, 70, 229, 0.2);
+    border-color: var(--primary);
+    color: #818cf8;
+    box-shadow: 0 0 10px rgba(79, 70, 229, 0.25);
 }
