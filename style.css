@@ -48,6 +48,10 @@
     --neon-shadow-l: 0 0 12px rgba(255, 118, 117, 0.5);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --anim-duration: 1000ms;
+
+    /* Proporciones base del layout */
+    --left-panel-width: clamp(220px, 19%, 300px);
+    --right-panel-width: clamp(200px, 18%, 280px);
 }
 
 /* ==========================================================================
@@ -197,12 +201,12 @@ input, button, select, textarea {
 
 .sidebar-left {
     border-right: 1px solid rgba(255, 255, 255, 0.08);
-    width: 290px;
+    width: var(--left-panel-width);
 }
 
 .sidebar-right {
     border-left: 1px solid rgba(255, 255, 255, 0.08);
-    width: 330px;
+    width: var(--right-panel-width);
 }
 
 .panel-section {
@@ -677,23 +681,24 @@ input, button, select, textarea {
 .main-canvas-area {
     flex: 1;
     background-color: #0e111a;
-    display: flex;
-    flex-direction: column;
-    padding: 16px;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 12px;
+    padding: clamp(10px, 1.2vw, 16px);
     height: 100%;
     position: relative;
     overflow: hidden;
+    min-width: 0;
 }
 
 .court-viewport-container {
-    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
     overflow: hidden;
     width: 100%;
-    margin-bottom: 12px;
+    min-height: 0;
 }
 
 .court-card {
@@ -703,11 +708,11 @@ input, button, select, textarea {
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 16px;
     box-shadow: var(--glass-shadow);
-    padding: 10px;
-    width: 100%;
-    height: 100%;
-    max-width: 1100px;
-    max-height: 660px;
+    padding: clamp(8px, 1vw, 12px);
+    width: min(100%, calc((100vh - 210px) * 1.66));
+    aspect-ratio: 5 / 3;
+    height: auto;
+    max-height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -815,7 +820,7 @@ input, button, select, textarea {
 .zone-number-svg {
     font-family: var(--font-heading);
     font-weight: 800;
-    font-size: 82px;
+    font-size: 68px;
     text-anchor: middle;
     dominant-baseline: middle;
     pointer-events: none;
@@ -910,20 +915,24 @@ input, button, select, textarea {
 
 .player-token-number {
     font-family: var(--font-body);
-    font-weight: 600;
-    font-size: 9px;
+    font-weight: 700;
+    font-size: 11px;
     text-anchor: middle;
     dominant-baseline: central;
-    fill: rgba(255, 255, 255, 0.7);
+    fill: rgba(255, 255, 255, 0.86);
     pointer-events: none;
 }
 
 .player-token-label {
     font-family: var(--font-body);
-    font-weight: 600;
-    font-size: 10px;
+    font-weight: 700;
+    font-size: 13px;
     text-anchor: middle;
     fill: var(--text-primary);
+    paint-order: stroke;
+    stroke: rgba(10, 13, 20, 0.9);
+    stroke-width: 1.8px;
+    stroke-linejoin: round;
     pointer-events: none;
 }
 
@@ -1026,7 +1035,7 @@ input, button, select, textarea {
     flex-direction: column;
     gap: 8px;
     transition: max-height 0.25s ease, padding 0.25s ease;
-    max-height: 220px;
+    max-height: clamp(160px, 24%, 220px);
 }
 
 .timeline-card.collapsed {
@@ -1287,6 +1296,70 @@ input, button, select, textarea {
 
 #player-editor-panel.collapsed .panel-toggle-btn .toggle-chevron {
     transform: rotate(180deg);
+}
+
+.panel-toggle-btn-inline {
+    width: auto;
+    height: 30px;
+    border-radius: 999px;
+    padding: 0 10px;
+    gap: 6px;
+}
+
+.panel-toggle-btn-inline .toggle-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1;
+}
+
+#court-settings-panel {
+    gap: 10px;
+}
+
+#court-settings-content {
+    display: flex;
+    flex-direction: column;
+    max-height: 380px;
+    opacity: 1;
+    overflow: hidden;
+    transition: max-height 0.25s ease, opacity 0.2s ease;
+}
+
+#court-settings-panel.collapsed {
+    gap: 0;
+    padding-bottom: 12px;
+}
+
+#court-settings-panel.collapsed #court-settings-content {
+    display: none;
+    max-height: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+#court-settings-panel.collapsed .panel-toggle-btn .toggle-chevron {
+    transform: rotate(180deg);
+}
+
+.court-settings-toggle-btn {
+    animation: courtTogglePulse 1.6s ease-in-out infinite;
+}
+
+@keyframes courtTogglePulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.0);
+        border-color: var(--border-color);
+    }
+    50% {
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.14);
+        border-color: rgba(99, 102, 241, 0.55);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.0);
+        border-color: var(--border-color);
+    }
 }
 
 .selected-player-placeholder p {
@@ -1851,30 +1924,52 @@ input, button, select, textarea {
    ========================================================================== */
 
 @media (max-width: 1280px) {
-    .sidebar {
-        width: 260px;
+    :root {
+        --left-panel-width: clamp(200px, 22%, 260px);
+        --right-panel-width: clamp(180px, 19%, 240px);
+    }
+
+    .timeline-card {
+        max-height: clamp(140px, 22%, 190px);
     }
 }
 
 @media (max-width: 960px) {
-    /* En tablets más pequeñas ocultamos paneles o cambiamos a scroll */
+    /* En tablet/móvil priorizamos la pizarra arriba y paneles debajo */
     .app-workspace {
         flex-direction: column;
         overflow-y: auto;
+    }
+
+    .main-canvas-area {
+        order: 1;
+        height: min(70vh, 76vw);
+        min-height: 360px;
+    }
+
+    .sidebar-left {
+        order: 2;
+    }
+
+    .sidebar-right {
+        order: 3;
     }
     
     .sidebar {
         width: 100%;
         height: auto;
         border: none;
+        max-height: 40vh;
     }
     
     .sidebar-left {
         border-bottom: 1px solid var(--border-color);
     }
     
-    .main-canvas-area {
-        height: 600px;
+    .court-card {
+        width: 100%;
+        max-width: 100%;
+        aspect-ratio: 5 / 3;
     }
 
     .timeline-header {
@@ -1898,6 +1993,201 @@ input, button, select, textarea {
     .subs-swap-btn {
         width: auto;
         min-width: 130px;
+    }
+}
+
+@media (max-width: 768px) {
+    html, body {
+        height: 100%;
+    }
+
+    body {
+        overflow: auto;
+        -webkit-text-size-adjust: 100%;
+        overscroll-behavior-y: contain;
+    }
+
+    .app-container {
+        min-height: 100dvh;
+        height: auto;
+    }
+
+    .app-header {
+        height: auto;
+        min-height: 56px;
+        padding: 8px 10px;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .logo-text .tagline {
+        display: none;
+    }
+
+    .quick-status {
+        order: 3;
+        width: 100%;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .status-indicator {
+        padding: 5px 10px;
+        font-size: 12px;
+    }
+
+    .header-actions {
+        gap: 6px;
+    }
+
+    .header-actions .btn {
+        padding: 8px 10px;
+        font-size: 12px;
+        min-height: 40px;
+    }
+
+    .app-workspace {
+        height: auto;
+        min-height: calc(100dvh - 72px);
+    }
+
+    .main-canvas-area {
+        height: min(58vh, 90vw);
+        min-height: 260px;
+        padding: 8px;
+        gap: 8px;
+    }
+
+    .timeline-card {
+        max-height: 180px;
+        padding: 10px;
+    }
+
+    .frames-track {
+        gap: 8px;
+    }
+
+    .frame-node {
+        min-width: 78px;
+        padding: 8px 10px;
+    }
+
+    .sidebar {
+        max-height: none;
+        overflow: visible;
+    }
+
+    .panel-section {
+        padding: 14px 12px;
+        gap: 10px;
+    }
+
+    .tool-btn,
+    .action-btn,
+    .btn-icon-small,
+    .tactic-fav-btn,
+    .panel-toggle-btn {
+        min-height: 44px;
+    }
+
+    .modal-overlay {
+        align-items: flex-end;
+    }
+
+    .modal-card,
+    .modal-card-sm,
+    .modal-card-lg,
+    .auth-card {
+        width: 100%;
+        max-width: none;
+        max-height: 92dvh;
+        border-radius: 14px 14px 0 0;
+    }
+
+    .modal-header,
+    .modal-footer {
+        padding: 12px 14px;
+    }
+
+    .modal-body,
+    .auth-modal-body {
+        padding: 14px;
+        max-height: calc(92dvh - 118px);
+    }
+
+    .roster-modal-content {
+        width: 100% !important;
+        height: 92dvh !important;
+        max-height: 92dvh !important;
+        border-radius: 14px 14px 0 0;
+    }
+
+    .roster-layout {
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 8px;
+    }
+
+    .roster-list-panel,
+    .roster-editor-panel {
+        min-height: 220px;
+    }
+
+    .storage-actions {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo-text h1 {
+        font-size: 17px;
+    }
+
+    .header-profile .username,
+    .save-status {
+        display: none;
+    }
+
+    .status-indicator {
+        max-width: 58vw;
+    }
+
+    .status-indicator span:last-child {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .main-canvas-area {
+        height: min(52vh, 96vw);
+        min-height: 230px;
+    }
+
+    .tool-grid-sub {
+        grid-template-columns: 1fr;
+    }
+
+    .action-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .tabs-modern {
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .tabs-modern::-webkit-scrollbar {
+        display: none;
+    }
+
+    .tab-btn {
+        min-width: 110px;
+        flex: 0 0 auto;
+    }
+
+    .auth-tab-btn {
+        padding: 12px;
+        font-size: 13px;
     }
 }
 

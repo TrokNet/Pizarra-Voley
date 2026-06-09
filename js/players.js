@@ -136,20 +136,20 @@ export class PlayerManager {
         circle.setAttribute('class', 'player-token-circle');
         circle.setAttribute('cx', '0');
         circle.setAttribute('cy', '0');
-        circle.setAttribute('r', isBall ? '15' : '24');
+        circle.setAttribute('r', isBall ? '17' : '28');
         g.appendChild(circle);
 
         if (!isBall) {
             // Grupo del Icono del Rol (NUEVO)
             const iconGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
             iconGroup.setAttribute('class', 'player-token-icon-group');
-            iconGroup.setAttribute('transform', 'translate(0, -6)');
+            iconGroup.setAttribute('transform', 'translate(0, -7)');
             
             const iconPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             iconPath.setAttribute('class', 'player-token-icon-path');
             iconPath.setAttribute('fill', 'none');
             iconPath.setAttribute('stroke', '#ffffff');
-            iconPath.setAttribute('stroke-width', '2');
+            iconPath.setAttribute('stroke-width', '2.2');
             iconPath.setAttribute('stroke-linecap', 'round');
             iconPath.setAttribute('stroke-linejoin', 'round');
             iconPath.setAttribute('d', this.getRoleIconPath(cfg.role));
@@ -160,12 +160,12 @@ export class PlayerManager {
             // Badge del Rol (Superscript Badge)
             const badge = document.createElementNS('http://www.w3.org/2000/svg', 'g');
             badge.setAttribute('class', 'player-token-role-badge');
-            badge.setAttribute('transform', 'translate(15, -15)');
+            badge.setAttribute('transform', 'translate(17, -17)');
             
             const badgeCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             badgeCircle.setAttribute('cx', '0');
             badgeCircle.setAttribute('cy', '0');
-            badgeCircle.setAttribute('r', '7');
+            badgeCircle.setAttribute('r', '8');
             badgeCircle.setAttribute('fill', '#141a28');
             badgeCircle.setAttribute('stroke', '#ffffff');
             badgeCircle.setAttribute('stroke-width', '1.2');
@@ -182,14 +182,14 @@ export class PlayerManager {
             // Texto del Número (abajo)
             const textNum = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             textNum.setAttribute('class', 'player-token-number');
-            textNum.setAttribute('y', '12');
+            textNum.setAttribute('y', '14');
             textNum.textContent = cfg.number;
             g.appendChild(textNum);
 
             // Nombre del jugador (debajo del círculo)
             const textName = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             textName.setAttribute('class', 'player-token-label');
-            textName.setAttribute('y', '38');
+            textName.setAttribute('y', '46');
             textName.textContent = cfg.name;
             g.appendChild(textName);
         } else {

@@ -4,11 +4,14 @@
  * posición favorita, persistencia local por usuario y modal de gestión.
  */
 
-import { LocalDatabase } from './localdb.js?v=20260602-2';
+import { LocalDatabase } from './localdb.js?v=20260603-2';
+import { ServerApi } from './api.js?v=20260604-113702';
 
 export class RosterManager {
     constructor() {
         this.db = LocalDatabase.getInstance();
+        this.api = ServerApi.getInstance();
+        this.remoteMode = false;
         this.currentUser = 'guest';
         this.playersList = []; // Lista de jugadores registrados { id, name, number, positions: [], primaryPosition }
         
@@ -40,6 +43,7 @@ export class RosterManager {
     }
 
     async init() {
+        this.remoteMode = await this.detectRemoteMode();
         // Cargar sesión activa
         await this.loadActiveUser();
         await this.loadRoster();
@@ -82,19 +86,43 @@ export class RosterManager {
         });
     }
 
+    async detectRemoteMode() {
+        if (!this.api.isEnabled()) return false;
+        try {
+            await this.api.health();
+            return true;
+        } catch (_) {
+            return false;
+        }
+    }
+
     async loadActiveUser() {
+        if (this.remoteMode) {
+            try {
+                const me = await this.api.me();
+                this.currentUser = (me.username || 'guest').toLowerCase();
+            } catch (_) {
+                this.currentUser = 'guest';
+            }
+            return;
+        }
+
         const session = await this.db.getActiveSession();
         this.currentUser = (session || 'guest').toLowerCase();
     }
 
-    getRosterStorageKey() {
-        return `players_roster_${this.currentUser}`;
-    }
-
     async loadRoster() {
         try {
-            const data = await this.db.getMeta(this.getRosterStorageKey());
-            this.playersList = Array.isArray(data) ? data : [];
+            if (this.remoteMode && this.currentUser !== 'guest') {
+                try {
+                    const data = await this.api.getRoster();
+                    this.playersList = Array.isArray(data.players) ? data.players : [];
+                } catch (_) {
+                    this.playersList = [];
+                }
+            } else {
+                this.playersList = [];
+            }
             this.notifyRosterChanged();
         } catch (err) {
             console.error('Error cargando plantilla de jugadores:', err);
@@ -104,11 +132,40 @@ export class RosterManager {
 
     async saveRosterToDB() {
         try {
-            await this.db.setMeta(this.getRosterStorageKey(), this.playersList);
+            if (this.remoteMode && this.currentUser !== 'guest') {
+                try {
+                    const result = await this.api.saveRoster(this.playersList);
+                    this.playersList = Array.isArray(result.players) ? result.players : this.playersList;
+                } catch (err) {
+                    alert(`No se pudo guardar la plantilla en el servidor: ${err.message}`);
+                    return;
+                }
+            } else {
+                alert('Inicia sesion y asegurese de que el servidor este disponible para guardar plantilla.');
+                return;
+            }
             this.notifyRosterChanged();
         } catch (err) {
             console.error('Error guardando plantilla de jugadores:', err);
         }
+    }
+
+    async loadLocalRoster(user) {
+        if (typeof this.db.getRosterByUser === 'function') {
+            return await this.db.getRosterByUser(user);
+        }
+
+        const legacy = await this.db.getMeta(`players_roster_${(user || 'guest').toLowerCase()}`);
+        return Array.isArray(legacy) ? legacy : [];
+    }
+
+    async saveLocalRoster(user, players) {
+        if (typeof this.db.saveRosterByUser === 'function') {
+            await this.db.saveRosterByUser(user, players);
+            return;
+        }
+
+        await this.db.setMeta(`players_roster_${(user || 'guest').toLowerCase()}`, players);
     }
 
     notifyRosterChanged() {

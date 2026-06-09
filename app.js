@@ -7,9 +7,9 @@ import { CourtManager } from './js/court.js?v=20260602-2';
 import { PlayerManager } from './js/players.js?v=20260602-3';
 import { DrawingManager } from './js/drawing.js?v=20260602-2';
 import { TimelineManager } from './js/timeline.js?v=20260602-2';
-import { StorageManager } from './js/storage.js?v=20260602-2';
-import { UserManager } from './js/users.js?v=20260602-2';
-import { RosterManager } from './js/roster.js?v=20260602-2';
+import { StorageManager } from './js/storage.js?v=20260604-113702';
+import { UserManager } from './js/users.js?v=20260604-113702';
+import { RosterManager } from './js/roster.js?v=20260604-113702';
 
 class App {
     constructor() {
@@ -37,6 +37,9 @@ class App {
 
         // 5. Comprimir/expandir ficha seleccionada para liberar espacio en tácticas
         this.setupPlayerEditorPanelToggle();
+
+        // 5a. Ocultar por defecto ajustes de cancha y permitir expandir/comprimir
+        this.setupCourtSettingsToggle();
         
         // 5b. Comprimir/expandir secuencia de jugada (timeline)
         this.setupTimelineToggle();
@@ -562,6 +565,33 @@ class App {
             if (e.detail && e.detail.playerId) {
                 this.setPlayerEditorCollapsed(false, false);
             }
+        });
+    }
+
+    setupCourtSettingsToggle() {
+        const panel = document.getElementById('court-settings-panel');
+        const content = document.getElementById('court-settings-content');
+        const btnToggle = document.getElementById('btn-toggle-court-settings');
+        const label = btnToggle ? btnToggle.querySelector('.toggle-label') : null;
+        if (!panel || !content || !btnToggle || !label) return;
+
+        const storageKey = 'vt-court-settings-collapsed';
+
+        const applyState = (collapsed) => {
+            panel.classList.toggle('collapsed', collapsed);
+            label.textContent = collapsed ? 'Mostrar' : 'Ocultar';
+            btnToggle.setAttribute('aria-expanded', (!collapsed).toString());
+            btnToggle.title = collapsed ? 'Expandir ajustes de cancha' : 'Comprimir ajustes de cancha';
+        };
+
+        const persisted = localStorage.getItem(storageKey);
+        const initialCollapsed = persisted === null ? true : persisted === '1';
+        applyState(initialCollapsed);
+
+        btnToggle.addEventListener('click', () => {
+            const willCollapse = !panel.classList.contains('collapsed');
+            applyState(willCollapse);
+            localStorage.setItem(storageKey, willCollapse ? '1' : '0');
         });
     }
 

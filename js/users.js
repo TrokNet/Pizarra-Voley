@@ -3,11 +3,14 @@
  * Maneja las cuentas de usuario en IndexedDB, cifrado SHA-256, sesiones activas y favoritos.
  */
 
-import { LocalDatabase } from './localdb.js';
+import { LocalDatabase } from './localdb.js?v=20260603-2';
+import { ServerApi } from './api.js?v=20260604-113702';
 
 export class UserManager {
     constructor() {
         this.db = LocalDatabase.getInstance();
+        this.api = ServerApi.getInstance();
+        this.remoteMode = false;
         this.currentUser = null; // null, 'guest', o username
         this.favorites = []; // array de IDs de tácticas preferidas
         
@@ -38,11 +41,22 @@ export class UserManager {
 
     async init() {
         await this.db.init();
+        this.remoteMode = await this.detectRemoteMode();
         this.setupAuthModalTabs();
         this.setupAuthListeners();
         
         // Cargar sesión guardada al iniciar
         await this.loadActiveSession();
+    }
+
+    async detectRemoteMode() {
+        if (!this.api.isEnabled()) return false;
+        try {
+            await this.api.health();
+            return true;
+        } catch (_) {
+            return false;
+        }
     }
 
     /**
@@ -152,47 +166,45 @@ export class UserManager {
      * Intenta registrar un nuevo usuario
      */
     async register(username, password) {
-        const normalizedUser = username.toLowerCase();
-        const existingUser = await this.db.getUser(normalizedUser);
-
-        if (existingUser) {
-            alert('El nombre de usuario ya existe. Elige otro.');
-            return false;
+        if (this.remoteMode) {
+            try {
+                const auth = await this.api.register(username, password);
+                this.currentUser = auth.username;
+                const me = await this.api.me();
+                this.favorites = me.favorites || [];
+                await this.db.setActiveSession(this.currentUser);
+                this.applySessionUI();
+                this.notifySessionChanged('login');
+                return true;
+            } catch (err) {
+                alert(`No se pudo registrar en el servidor: ${err.message}`);
+                return false;
+            }
         }
 
-        const hashedPassword = await this.hashPassword(password);
-        await this.db.saveUser({
-            id: normalizedUser,
-            username: username,
-            passwordHash: hashedPassword,
-            favorites: [],
-            settings: {}
-        });
-        return true;
+        alert('Servidor no disponible. El registro solo esta habilitado en la base de datos central.');
+        return false;
     }
 
     /**
      * Intenta autenticar a un usuario
      */
     async login(username, password) {
-        const normalizedUser = username.toLowerCase();
-        const userObj = await this.db.getUser(normalizedUser);
-
-        if (!userObj) return false;
-
-        const hashedPassword = await this.hashPassword(password);
-        if (userObj.passwordHash === hashedPassword) {
-            this.currentUser = userObj.username;
-            this.favorites = userObj.favorites || [];
-            
-            // Guardar sesión activa
-            await this.db.setActiveSession(this.currentUser);
-            
-            this.applySessionUI();
-            this.notifySessionChanged('login');
-            return true;
+        if (this.remoteMode) {
+            try {
+                const auth = await this.api.login(username, password);
+                this.currentUser = auth.username;
+                const me = await this.api.me();
+                this.favorites = me.favorites || [];
+                await this.db.setActiveSession(this.currentUser);
+                this.applySessionUI();
+                this.notifySessionChanged('login');
+                return true;
+            } catch (_) {
+                return false;
+            }
         }
-
+        alert('Servidor no disponible. El inicio de sesion requiere la base de datos central.');
         return false;
     }
 
@@ -202,6 +214,14 @@ export class UserManager {
     async loginAsGuest() {
         this.currentUser = 'guest';
         this.favorites = [];
+        await this.db.setActiveSession('guest');
+
+        if (this.remoteMode) {
+            this.api.logout();
+            this.applySessionUI();
+            this.notifySessionChanged('login');
+            return;
+        }
         
         await this.db.setActiveSession('guest');
         
@@ -216,6 +236,13 @@ export class UserManager {
         if (confirm('¿Estás seguro de que quieres cerrar la sesión? Tu pizarra táctica se reiniciará.')) {
             this.currentUser = null;
             this.favorites = [];
+
+            if (this.remoteMode) {
+                this.api.logout();
+            } else {
+                await this.db.clearActiveSession();
+            }
+
             await this.db.clearActiveSession();
             
             this.applySessionUI();
@@ -227,6 +254,29 @@ export class UserManager {
      * Carga la sesión activa desde IndexedDB al iniciar
      */
     async loadActiveSession() {
+        if (this.remoteMode) {
+            try {
+                const me = await this.api.me();
+                this.currentUser = me.username;
+                this.favorites = me.favorites || [];
+                await this.db.setActiveSession(this.currentUser);
+            } catch (_) {
+                const active = await this.db.getActiveSession();
+                if (active === 'guest') {
+                    this.currentUser = 'guest';
+                    this.favorites = [];
+                } else {
+                    this.currentUser = null;
+                    this.favorites = [];
+                }
+                this.api.logout();
+            }
+
+            this.applySessionUI();
+            this.notifySessionChanged('init');
+            return;
+        }
+
         const active = await this.db.getActiveSession();
         
         if (active) {
@@ -303,7 +353,13 @@ export class UserManager {
         }
 
         // Guardar persistencia en base de datos si no es invitado
-        if (this.currentUser !== 'guest') {
+        if (this.remoteMode) {
+            try {
+                await this.api.updateFavorites(this.favorites);
+            } catch (err) {
+                console.warn('No se pudieron guardar favoritos en servidor:', err.message);
+            }
+        } else if (this.currentUser !== 'guest') {
             const normalizedUser = this.currentUser.toLowerCase();
             const userObj = await this.db.getUser(normalizedUser);
             if (userObj) {
