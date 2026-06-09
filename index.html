@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pizarra Táctica de Voleibol - VoleyTactics</title>
     <meta name="description" content="Una pizarra táctica interactiva avanzada para voleibol. Diseña estrategias, rotaciones y anima jugadas en tiempo real.">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=20260605-1548">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -138,9 +138,15 @@
                 </div>
 
                 <!-- PERSONALIZACIÓN CANCHA -->
-                <div class="panel-section">
-                    <h2 class="section-title">Ajustes de Cancha</h2>
-                    <div class="settings-stack">
+                <div class="panel-section collapsed" id="court-settings-panel">
+                    <div class="section-header-row">
+                        <h2 class="section-title">Ajustes de Cancha</h2>
+                        <button id="btn-toggle-court-settings" class="panel-toggle-btn panel-toggle-btn-inline court-settings-toggle-btn" type="button" aria-expanded="false" title="Expandir ajustes de cancha">
+                            <span class="toggle-label">Expandir</span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon toggle-chevron"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                        </button>
+                    </div>
+                    <div class="settings-stack" id="court-settings-content">
                         <div class="setting-field">
                             <span class="field-label">Vista de Cancha</span>
                             <div class="toggle-btn-group">
@@ -195,7 +201,7 @@
                     </div>
                     <div class="saved-plays-list" id="saved-plays-list">
                         <!-- Se llena dinámicamente -->
-                        <div class="empty-state">No hay jugadas guardadas localmente.</div>
+                        <div class="empty-state">No hay jugadas guardadas en el servidor.</div>
                     </div>
                     <div class="storage-actions">
                         <button id="btn-import-json" class="btn btn-secondary btn-full btn-sm">
@@ -773,7 +779,7 @@
                         </svg>
                         <h2>Voley<span>Tactics</span></h2>
                     </div>
-                    <p class="auth-welcome">Inicia sesión para guardar tus tácticas en tu bóveda local de entrenador.</p>
+                    <p class="auth-welcome">Inicia sesión para guardar tus tácticas en la base central y acceder desde cualquier sede.</p>
                     <div class="settings-stack">
                         <div class="setting-field">
                             <label for="login-user">Nombre de Usuario</label>
@@ -792,7 +798,7 @@
                     <div class="logo-area auth-logo">
                         <h2>Crear Cuenta</h2>
                     </div>
-                    <p class="auth-welcome">Regístrate localmente. Tus credenciales se encriptan con seguridad SHA-256 en tu propio navegador.</p>
+                    <p class="auth-welcome">Regístrate para guardar tus datos en servidor con autenticación segura y acceso multiusuario.</p>
                     <div class="settings-stack">
                         <div class="setting-field">
                             <label for="register-user">Nombre de Usuario</label>
@@ -819,7 +825,7 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M5 12h14"></path><polyline points="12 5 19 12 12 19"></polyline></svg>
                 </button>
 
-                <p class="auth-credit-discreet">Creado por Carlos Ledesma - Peru - Programador y NOC - +51 961 208 028</p>
+                <p class="auth-credit-discreet">Creado por Carlos Ledesma - Peru - +51 961 208 028</p>
             </div>
         </div>
     </div>
@@ -929,6 +935,6 @@
     </svg>
 
     <!-- CARGA DE SCRIPTS -->
-    <script type="module" src="app.js?v=20260602-6"></script>
+    <script type="module" src="app.js?v=20260604-113702"></script>
 </body>
 </html>

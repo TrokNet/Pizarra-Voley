@@ -15,12 +15,13 @@ export class LocalDatabase {
 
     constructor() {
         this.dbName = 'voley_tactics_local_db';
-        this.dbVersion = 1;
+        this.dbVersion = 2;
         this.db = null;
         this.initPromise = null;
 
         this.usersStore = 'users';
         this.playsStore = 'plays';
+        this.rostersStore = 'rosters';
         this.metaStore = 'meta';
 
         // Legacy keys for one-time migration from LocalStorage.
@@ -28,6 +29,8 @@ export class LocalDatabase {
         this.legacySessionKey = 'voley_tactics_active_session';
         this.legacyPlaysPrefix = 'voley_tactics_saved_plays_';
         this.migrationFlagKey = 'legacy_migrated_v1';
+        this.rosterMetaMigrationFlagKey = 'roster_meta_migrated_v2';
+        this.legacyRosterPrefix = 'players_roster_';
     }
 
     async init() {
@@ -55,6 +58,12 @@ export class LocalDatabase {
                     plays.createIndex('byUpdatedAt', 'updatedAt', { unique: false });
                 }
 
+                if (!db.objectStoreNames.contains(this.rostersStore)) {
+                    const rosters = db.createObjectStore(this.rostersStore, { keyPath: 'id' });
+                    rosters.createIndex('byUser', 'user', { unique: true });
+                    rosters.createIndex('byUpdatedAt', 'updatedAt', { unique: false });
+                }
+
                 if (!db.objectStoreNames.contains(this.metaStore)) {
                     db.createObjectStore(this.metaStore, { keyPath: 'key' });
                 }
@@ -68,6 +77,7 @@ export class LocalDatabase {
 
         await this.initPromise;
         await this.migrateFromLegacyLocalStorage();
+        await this.migrateRosterMetaToDedicatedStore();
     }
 
     tx(storeName, mode = 'readonly') {
@@ -183,6 +193,29 @@ export class LocalDatabase {
         return record;
     }
 
+    async getRosterByUser(user) {
+        await this.init();
+        const normalizedUser = this.normalizeUser(user);
+        const roster = await this.requestToPromise(this.tx(this.rostersStore).get(normalizedUser));
+        if (!roster || !Array.isArray(roster.players)) {
+            return [];
+        }
+        return roster.players;
+    }
+
+    async saveRosterByUser(user, players) {
+        await this.init();
+        const normalizedUser = this.normalizeUser(user);
+        const record = {
+            id: normalizedUser,
+            user: normalizedUser,
+            players: Array.isArray(players) ? players : [],
+            updatedAt: Date.now()
+        };
+        await this.requestToPromise(this.tx(this.rostersStore, 'readwrite').put(record));
+        return record;
+    }
+
     async deletePlay(user, playName) {
         await this.init();
         const id = this.makePlayId(user, playName);
@@ -243,6 +276,44 @@ export class LocalDatabase {
             console.warn('No se pudo migrar LocalStorage a IndexedDB:', err);
         } finally {
             await this.setMeta(this.migrationFlagKey, true);
+        }
+    }
+
+    async migrateRosterMetaToDedicatedStore() {
+        const alreadyMigrated = await this.getMeta(this.rosterMetaMigrationFlagKey);
+        if (alreadyMigrated) return;
+
+        try {
+            const metaStore = this.tx(this.metaStore);
+            const records = await new Promise((resolve, reject) => {
+                const list = [];
+                const req = metaStore.openCursor();
+
+                req.onsuccess = (event) => {
+                    const cursor = event.target.result;
+                    if (!cursor) {
+                        resolve(list);
+                        return;
+                    }
+                    list.push(cursor.value);
+                    cursor.continue();
+                };
+
+                req.onerror = () => reject(req.error);
+            });
+
+            for (const record of records) {
+                if (!record || typeof record.key !== 'string') continue;
+                if (!record.key.startsWith(this.legacyRosterPrefix)) continue;
+
+                const normalizedUser = this.normalizeUser(record.key.replace(this.legacyRosterPrefix, ''));
+                const players = Array.isArray(record.value) ? record.value : [];
+                await this.saveRosterByUser(normalizedUser, players);
+            }
+        } catch (err) {
+            console.warn('No se pudo migrar plantilla desde meta store:', err);
+        } finally {
+            await this.setMeta(this.rosterMetaMigrationFlagKey, true);
         }
     }
 }

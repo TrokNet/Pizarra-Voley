@@ -1,0 +1,36 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: voley-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: voleytactics
+      POSTGRES_USER: voley
+      POSTGRES_PASSWORD: voley
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./backups:/backups
+
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: voley-api
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgresql+psycopg://voley:voley@postgres:5432/voleytactics
+      JWT_SECRET: change-this-secret-in-production
+      JWT_ALGORITHM: HS256
+      JWT_EXP_MINUTES: 1440
+      DEBUG: "false"
+    ports:
+      - "8000:8000"
+
+volumes:
+  pg_data:

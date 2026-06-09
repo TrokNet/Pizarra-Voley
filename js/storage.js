@@ -3,12 +3,15 @@
  * Maneja el almacenamiento en IndexedDB, la exportación/importación JSON y la conversión de SVG a imagen PNG.
  */
 
-import { LocalDatabase } from './localdb.js';
+import { LocalDatabase } from './localdb.js?v=20260603-2';
+import { ServerApi } from './api.js?v=20260604-113702';
 
 export class StorageManager {
     constructor(timelineManager) {
         this.tm = timelineManager;
         this.db = LocalDatabase.getInstance();
+        this.api = ServerApi.getInstance();
+        this.remoteMode = false;
         
         // Buttons
         this.btnSave = document.getElementById('btn-save-play');
@@ -38,8 +41,20 @@ export class StorageManager {
 
     async init() {
         await this.db.init();
-        const activeUser = await this.db.getActiveSession();
-        this.currentUser = activeUser || 'guest';
+        this.remoteMode = await this.detectRemoteMode();
+
+        if (this.remoteMode) {
+            try {
+                const me = await this.api.me();
+                this.currentUser = me.username || 'guest';
+            } catch (_) {
+                this.currentUser = 'guest';
+            }
+        } else {
+            const activeUser = await this.db.getActiveSession();
+            this.currentUser = activeUser || 'guest';
+        }
+
         await this.renderSavedPlaysList();
         await this.loadLastSavedPlay();
 
@@ -96,6 +111,16 @@ export class StorageManager {
         this.btnExportPng.addEventListener('click', () => this.exportToPng());
     }
 
+    async detectRemoteMode() {
+        if (!this.api.isEnabled()) return false;
+        try {
+            await this.api.health();
+            return true;
+        } catch (_) {
+            return false;
+        }
+    }
+
     /**
      * Crea una jugada limpia y resetea la pizarra
      */
@@ -114,7 +139,7 @@ export class StorageManager {
         const normalizedCurrentName = (this.currentPlayName || '').trim().toLowerCase();
         const isRenamingCurrentPlay = normalizedCurrentName && normalizedCurrentName === normalizedNewName;
 
-        if (!isRenamingCurrentPlay) {
+        if (!isRenamingCurrentPlay && !this.remoteMode) {
             const existingPlay = await this.db.getPlayByName(this.currentUser, name);
             if (existingPlay) {
                 alert('Ya existe una jugada con ese nombre. Selecciona otro nombre para no sobrescribir.');
@@ -132,16 +157,48 @@ export class StorageManager {
             frames: this.tm.serializeTimeline()
         };
 
-        await this.db.savePlay(this.currentUser, playData);
+        if (this.remoteMode) {
+            if (this.currentUser === 'guest') {
+                alert('Inicia sesion para guardar jugadas en la base de datos central.');
+                this.updateSaveStatus('No se guardo: usuario invitado');
+                return false;
+            }
+
+            try {
+                await this.api.savePlay(playData);
+            } catch (err) {
+                alert(`No se pudo guardar en el servidor: ${err.message}`);
+                this.updateSaveStatus('Error al guardar en servidor');
+                return false;
+            }
+        } else {
+            alert('Servidor no disponible. No se guardan jugadas fuera de la base de datos central.');
+            this.updateSaveStatus('Servidor no disponible');
+            return false;
+        }
+
         await this.renderSavedPlaysList();
-        this.updateSaveStatus('Guardado en BD local');
+        this.updateSaveStatus('Guardado en servidor central');
         return true;
     }
 
     async loadLastSavedPlay() {
-        const lastPlay = await this.db.getLastPlayByUser(this.currentUser);
+        let lastPlay = null;
+
+        if (this.remoteMode && this.currentUser !== 'guest') {
+            try {
+                const plays = await this.api.getPlays();
+                lastPlay = Array.isArray(plays) && plays.length > 0 ? plays[0] : null;
+            } catch (_) {
+                lastPlay = null;
+            }
+        }
+
         if (!lastPlay) {
             this.createNewPlay();
+            if (!this.remoteMode) {
+                this.updateSaveStatus('Servidor no disponible');
+            }
             return;
         }
 
@@ -153,7 +210,14 @@ export class StorageManager {
      * Obtiene el listado de jugadas guardadas en IndexedDB
      */
     async getSavedPlays() {
-        return await this.db.getPlaysByUser(this.currentUser);
+        if (this.remoteMode && this.currentUser !== 'guest') {
+            try {
+                return await this.api.getPlays();
+            } catch (_) {
+                return [];
+            }
+        }
+        return [];
     }
 
     /**
@@ -175,7 +239,7 @@ export class StorageManager {
         this.savedPlaysList.innerHTML = '';
 
         if (plays.length === 0) {
-            this.savedPlaysList.innerHTML = '<div class="empty-state">No hay jugadas guardadas en la BD local.</div>';
+            this.savedPlaysList.innerHTML = '<div class="empty-state">No hay jugadas guardadas en el servidor.</div>';
             return;
         }
 
@@ -237,7 +301,25 @@ export class StorageManager {
      * Borra una jugada de IndexedDB
      */
     async deletePlay(name) {
-        await this.db.deletePlay(this.currentUser, name);
+        if (!this.remoteMode) {
+            alert('Servidor no disponible. No se pueden eliminar jugadas fuera de la base de datos central.');
+            this.updateSaveStatus('Servidor no disponible');
+            return;
+        }
+
+        if (this.currentUser === 'guest') {
+            alert('Inicia sesion para eliminar jugadas de la base de datos central.');
+            this.updateSaveStatus('No autorizado para eliminar');
+            return;
+        }
+
+        try {
+            await this.api.deletePlay(name);
+        } catch (err) {
+            alert(`No se pudo eliminar en el servidor: ${err.message}`);
+            this.updateSaveStatus('Error al eliminar en servidor');
+            return;
+        }
         
         if (this.currentPlayName === name) {
             this.createNewPlay();
