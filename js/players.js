@@ -147,14 +147,11 @@ export class PlayerManager {
             
             const iconPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             iconPath.setAttribute('class', 'player-token-icon-path');
-<<<<<<< HEAD
-=======
             iconPath.setAttribute('fill', 'none');
             iconPath.setAttribute('stroke', '#ffffff');
             iconPath.setAttribute('stroke-width', '2.2');
             iconPath.setAttribute('stroke-linecap', 'round');
             iconPath.setAttribute('stroke-linejoin', 'round');
->>>>>>> bf009f3dd30adfeda24400cbe743de1bc01e1710
             iconPath.setAttribute('d', this.getRoleIconPath(cfg.role));
             
             iconGroup.appendChild(iconPath);
@@ -168,14 +165,10 @@ export class PlayerManager {
             const badgeCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             badgeCircle.setAttribute('cx', '0');
             badgeCircle.setAttribute('cy', '0');
-<<<<<<< HEAD
-            badgeCircle.setAttribute('r', '7');
-=======
             badgeCircle.setAttribute('r', '8');
             badgeCircle.setAttribute('fill', '#141a28');
             badgeCircle.setAttribute('stroke', '#ffffff');
             badgeCircle.setAttribute('stroke-width', '1.2');
->>>>>>> bf009f3dd30adfeda24400cbe743de1bc01e1710
             badge.appendChild(badgeCircle);
             
             const badgeText = document.createElementNS('http://www.w3.org/2000/svg', 'text');

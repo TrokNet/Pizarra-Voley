@@ -3,8 +3,8 @@
  * Maneja el almacenamiento en IndexedDB, la exportación/importación JSON y la conversión de SVG a imagen PNG.
  */
 
-import { LocalDatabase } from './localdb.js?v=20260603-2';
-import { ServerApi } from './api.js?v=20260604-113702';
+import { LocalDatabase } from './localdb.js?v=20260610-001';
+import { ServerApi } from './api.js?v=20260610-001';
 
 export class StorageManager {
     constructor(timelineManager) {

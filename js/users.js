@@ -3,8 +3,8 @@
  * Maneja las cuentas de usuario en IndexedDB, cifrado SHA-256, sesiones activas y favoritos.
  */
 
-import { LocalDatabase } from './localdb.js?v=20260603-2';
-import { ServerApi } from './api.js?v=20260604-113702';
+import { LocalDatabase } from './localdb.js?v=20260610-001';
+import { ServerApi } from './api.js?v=20260610-001';
 
 export class UserManager {
     constructor() {
