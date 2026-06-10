@@ -75,27 +75,41 @@ export class ServerApi {
             headers.Authorization = `Bearer ${token}`;
         }
 
-        const response = await fetch(`${this.baseUrl}${path}`, {
-            ...options,
-            headers
-        });
+        // AbortController con timeout de 8 segundos para peticiones normales
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-        if (!response.ok) {
-            let detail = `HTTP ${response.status}`;
-            try {
-                const errorData = await response.json();
-                detail = errorData.detail || detail;
-            } catch (_) {
-                // noop
+        try {
+            const response = await fetch(`${this.baseUrl}${path}`, {
+                ...options,
+                headers,
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                let detail = `HTTP ${response.status}`;
+                try {
+                    const errorData = await response.json();
+                    detail = errorData.detail || detail;
+                } catch (_) {
+                    // noop
+                }
+                throw new Error(detail);
             }
-            throw new Error(detail);
-        }
 
-        const contentType = response.headers.get('content-type') || '';
-        if (contentType.includes('application/json')) {
-            return await response.json();
+            const contentType = response.headers.get('content-type') || '';
+            if (contentType.includes('application/json')) {
+                return await response.json();
+            }
+            return null;
+        } catch (err) {
+            clearTimeout(timeoutId);
+            if (err.name === 'AbortError') {
+                throw new Error('La peticion al servidor excedio el tiempo de espera');
+            }
+            throw err;
         }
-        return null;
     }
 
     async checkHealthAtBase(baseUrl) {
@@ -104,17 +118,36 @@ export class ServerApi {
             throw new Error('Base URL vacia');
         }
 
-        let response = await fetch(`${cleanBase}/health`, { method: 'GET' });
-        if (!response.ok && cleanBase.endsWith('/api')) {
-            const rootBase = cleanBase.slice(0, -4);
-            response = await fetch(`${rootBase}/health`, { method: 'GET' });
-        }
+        // AbortController con timeout de 3 segundos para health checks
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
 
-        if (!response.ok) {
-            throw new Error(`Health check fallo en ${cleanBase}`);
-        }
+        try {
+            let response = await fetch(`${cleanBase}/health`, {
+                method: 'GET',
+                signal: controller.signal
+            });
+            if (!response.ok && cleanBase.endsWith('/api')) {
+                const rootBase = cleanBase.slice(0, -4);
+                response = await fetch(`${rootBase}/health`, {
+                    method: 'GET',
+                    signal: controller.signal
+                });
+            }
 
-        return await response.json();
+            if (!response.ok) {
+                throw new Error(`Health check fallo en ${cleanBase}`);
+            }
+
+            return await response.json();
+        } catch (err) {
+            if (err.name === 'AbortError') {
+                throw new Error('Health check excedio el tiempo de espera');
+            }
+            throw err;
+        } finally {
+            clearTimeout(timeoutId);
+        }
     }
 
     async health() {

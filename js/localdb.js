@@ -41,9 +41,20 @@ export class LocalDatabase {
         }
 
         this.initPromise = new Promise((resolve, reject) => {
+            // Verificar si IndexedDB está disponible en el navegador
+            if (!window.indexedDB) {
+                this.fallbackToLocalStorage();
+                resolve();
+                return;
+            }
+
             const request = indexedDB.open(this.dbName, this.dbVersion);
 
-            request.onerror = () => reject(request.error);
+            request.onerror = () => {
+                console.warn('IndexedDB falló al abrir, usando localStorage como fallback:', request.error);
+                this.fallbackToLocalStorage();
+                resolve();
+            };
 
             request.onupgradeneeded = (event) => {
                 const db = event.target.result;
@@ -76,8 +87,62 @@ export class LocalDatabase {
         });
 
         await this.initPromise;
-        await this.migrateFromLegacyLocalStorage();
-        await this.migrateRosterMetaToDedicatedStore();
+        if (this.db) {
+            await this.migrateFromLegacyLocalStorage();
+            await this.migrateRosterMetaToDedicatedStore();
+        }
+    }
+
+    fallbackToLocalStorage() {
+        this.db = null;
+        this.useLocalStorage = true;
+        console.log('LocalDB: Usando localStorage como fallback persistente');
+    }
+
+    _lsKey(store, key) {
+        return `voley_ls_${store}_${key}`;
+    }
+
+    _lsGet(store, key) {
+        try {
+            const raw = localStorage.getItem(this._lsKey(store, key));
+            return raw ? JSON.parse(raw) : null;
+        } catch (_) {
+            return null;
+        }
+    }
+
+    _lsSet(store, key, value) {
+        try {
+            localStorage.setItem(this._lsKey(store, key), JSON.stringify(value));
+            return true;
+        } catch (_) {
+            return false;
+        }
+    }
+
+    _lsRemove(store, key) {
+        try {
+            localStorage.removeItem(this._lsKey(store, key));
+        } catch (_) {
+            // noop
+        }
+    }
+
+    _lsList(store) {
+        const prefix = `voley_ls_${store}_`;
+        const items = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && k.startsWith(prefix)) {
+                try {
+                    items.push(JSON.parse(localStorage.getItem(k)));
+                } catch (_) {
+                    // skip corrupt
+                }
+            }
+        }
+        return items;
     }
 
     tx(storeName, mode = 'readonly') {
@@ -101,12 +166,19 @@ export class LocalDatabase {
 
     async getMeta(key) {
         await this.init();
+        if (this.useLocalStorage) {
+            return this._lsGet(this.metaStore, key);
+        }
         const record = await this.requestToPromise(this.tx(this.metaStore).get(key));
         return record ? record.value : null;
     }
 
     async setMeta(key, value) {
         await this.init();
+        if (this.useLocalStorage) {
+            this._lsSet(this.metaStore, key, { key, value });
+            return;
+        }
         await this.requestToPromise(this.tx(this.metaStore, 'readwrite').put({ key, value }));
     }
 
@@ -124,6 +196,9 @@ export class LocalDatabase {
 
     async getUser(normalizedUser) {
         await this.init();
+        if (this.useLocalStorage) {
+            return this._lsGet(this.usersStore, normalizedUser);
+        }
         return await this.requestToPromise(this.tx(this.usersStore).get(normalizedUser));
     }
 
@@ -138,6 +213,11 @@ export class LocalDatabase {
             settings: userObj.settings || {}
         };
 
+        if (this.useLocalStorage) {
+            this._lsSet(this.usersStore, id, userRecord);
+            return userRecord;
+        }
+
         await this.requestToPromise(this.tx(this.usersStore, 'readwrite').put(userRecord));
         return userRecord;
     }
@@ -145,6 +225,15 @@ export class LocalDatabase {
     async getPlaysByUser(user) {
         await this.init();
         const normalizedUser = this.normalizeUser(user);
+
+        if (this.useLocalStorage) {
+            const all = this._lsList(this.playsStore);
+            return all
+                .filter(p => p.user === normalizedUser)
+                .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))
+                .map(p => ({ name: p.name, date: p.date, frames: p.frames }));
+        }
+
         const index = this.tx(this.playsStore).index('byUser');
         const records = await this.requestToPromise(index.getAll(normalizedUser));
 
@@ -160,6 +249,13 @@ export class LocalDatabase {
     async getPlayByName(user, playName) {
         await this.init();
         const id = this.makePlayId(user, playName);
+
+        if (this.useLocalStorage) {
+            const play = this._lsGet(this.playsStore, id);
+            if (!play) return null;
+            return { name: play.name, date: play.date, frames: play.frames };
+        }
+
         const play = await this.requestToPromise(this.tx(this.playsStore).get(id));
         if (!play) return null;
 
@@ -189,6 +285,11 @@ export class LocalDatabase {
             updatedAt: Date.now()
         };
 
+        if (this.useLocalStorage) {
+            this._lsSet(this.playsStore, id, record);
+            return record;
+        }
+
         await this.requestToPromise(this.tx(this.playsStore, 'readwrite').put(record));
         return record;
     }
@@ -196,6 +297,15 @@ export class LocalDatabase {
     async getRosterByUser(user) {
         await this.init();
         const normalizedUser = this.normalizeUser(user);
+
+        if (this.useLocalStorage) {
+            const roster = this._lsGet(this.rostersStore, normalizedUser);
+            if (!roster || !Array.isArray(roster.players)) {
+                return [];
+            }
+            return roster.players;
+        }
+
         const roster = await this.requestToPromise(this.tx(this.rostersStore).get(normalizedUser));
         if (!roster || !Array.isArray(roster.players)) {
             return [];
@@ -212,6 +322,12 @@ export class LocalDatabase {
             players: Array.isArray(players) ? players : [],
             updatedAt: Date.now()
         };
+
+        if (this.useLocalStorage) {
+            this._lsSet(this.rostersStore, normalizedUser, record);
+            return record;
+        }
+
         await this.requestToPromise(this.tx(this.rostersStore, 'readwrite').put(record));
         return record;
     }
@@ -219,6 +335,12 @@ export class LocalDatabase {
     async deletePlay(user, playName) {
         await this.init();
         const id = this.makePlayId(user, playName);
+
+        if (this.useLocalStorage) {
+            this._lsRemove(this.playsStore, id);
+            return;
+        }
+
         await this.requestToPromise(this.tx(this.playsStore, 'readwrite').delete(id));
     }
 

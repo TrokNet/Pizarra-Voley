@@ -40,13 +40,31 @@ export class UserManager {
     }
 
     async init() {
-        await this.db.init();
-        this.remoteMode = await this.detectRemoteMode();
+        try {
+            await this.db.init();
+        } catch (err) {
+            console.warn('IndexedDB no disponible, usando fallback localStorage:', err);
+        }
+
+        try {
+            this.remoteMode = await this.detectRemoteMode();
+        } catch (err) {
+            console.warn('Servidor no detectado, modo offline activo:', err);
+            this.remoteMode = false;
+        }
+
+        // SIEMPRE configurar los listeners, independientemente de si hay DB o servidor
         this.setupAuthModalTabs();
         this.setupAuthListeners();
         
         // Cargar sesión guardada al iniciar
-        await this.loadActiveSession();
+        try {
+            await this.loadActiveSession();
+        } catch (err) {
+            console.warn('No se pudo cargar sesión activa:', err);
+            this.currentUser = null;
+            this.applySessionUI();
+        }
     }
 
     async detectRemoteMode() {
@@ -172,7 +190,11 @@ export class UserManager {
                 this.currentUser = auth.username;
                 const me = await this.api.me();
                 this.favorites = me.favorites || [];
-                await this.db.setActiveSession(this.currentUser);
+                try {
+                    await this.db.setActiveSession(this.currentUser);
+                } catch (dbErr) {
+                    console.warn('No se pudo guardar sesión en IndexedDB:', dbErr);
+                }
                 this.applySessionUI();
                 this.notifySessionChanged('login');
                 return true;
@@ -196,11 +218,16 @@ export class UserManager {
                 this.currentUser = auth.username;
                 const me = await this.api.me();
                 this.favorites = me.favorites || [];
-                await this.db.setActiveSession(this.currentUser);
+                try {
+                    await this.db.setActiveSession(this.currentUser);
+                } catch (dbErr) {
+                    console.warn('No se pudo guardar sesión en IndexedDB:', dbErr);
+                }
                 this.applySessionUI();
                 this.notifySessionChanged('login');
                 return true;
-            } catch (_) {
+            } catch (apiErr) {
+                alert('Usuario o contraseña incorrectos.');
                 return false;
             }
         }
@@ -214,17 +241,16 @@ export class UserManager {
     async loginAsGuest() {
         this.currentUser = 'guest';
         this.favorites = [];
-        await this.db.setActiveSession('guest');
 
-        if (this.remoteMode) {
-            this.api.logout();
-            this.applySessionUI();
-            this.notifySessionChanged('login');
-            return;
+        try {
+            if (this.remoteMode) {
+                this.api.logout();
+            }
+            await this.db.setActiveSession('guest');
+        } catch (err) {
+            console.warn('No se pudo guardar sesión de invitado en IndexedDB:', err);
         }
-        
-        await this.db.setActiveSession('guest');
-        
+
         this.applySessionUI();
         this.notifySessionChanged('login');
     }
@@ -239,11 +265,13 @@ export class UserManager {
 
             if (this.remoteMode) {
                 this.api.logout();
-            } else {
-                await this.db.clearActiveSession();
             }
 
-            await this.db.clearActiveSession();
+            try {
+                await this.db.clearActiveSession();
+            } catch (err) {
+                console.warn('No se pudo limpiar sesión en IndexedDB:', err);
+            }
             
             this.applySessionUI();
             this.notifySessionChanged('logout');
