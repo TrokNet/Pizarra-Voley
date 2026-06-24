@@ -210,52 +210,56 @@ input, button, select, textarea {
 }
 
 /* ==========================================================================
-   SIDEBAR COLLAPSE TOGGLE
+   SIDEBAR COLLAPSE TOGGLE — Minimalista
    ========================================================================== */
 
 .sidebar-collapse-btn {
     position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 28px;
-    height: 64px;
-    background: rgba(13, 17, 27, 0.92);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.10);
+    top: 16px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(13, 17, 27, 0.45);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     z-index: 20;
-    color: rgba(255, 255, 255, 0.55);
+    color: rgba(255, 255, 255, 0.35);
     padding: 0;
-    transition: background var(--transition-smooth), color var(--transition-smooth);
+    opacity: 0;
+    transition: opacity 0.25s ease, background var(--transition-smooth), color var(--transition-smooth), border-color var(--transition-smooth);
+}
+
+.sidebar:hover .sidebar-collapse-btn,
+.sidebar.collapsed .sidebar-collapse-btn {
+    opacity: 1;
 }
 
 .sidebar-collapse-btn:hover {
-    background: rgba(30, 36, 52, 0.95);
+    background: rgba(30, 36, 52, 0.85);
     color: #ffffff;
+    border-color: rgba(0, 242, 254, 0.35);
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.15);
 }
 
 .sidebar-collapse-btn svg {
-    width: 18px;
-    height: 18px;
+    width: 14px;
+    height: 14px;
     pointer-events: none;
 }
 
-/* Pestaña izquierda: se asoma por el borde derecho del sidebar */
+/* Botón izquierdo: esquinado arriba-derecha */
 .sidebar-collapse-left {
-    right: -28px;
-    border-radius: 0 6px 6px 0;
-    border-left: none;
+    right: 10px;
 }
 
-/* Pestaña derecha: se asoma por el borde izquierdo del sidebar */
+/* Botón derecho: esquinado arriba-izquierda */
 .sidebar-collapse-right {
-    left: -28px;
-    border-radius: 6px 0 0 6px;
-    border-right: none;
+    left: 10px;
 }
 
 /* === SIDEBAR COLAPSADO === */
@@ -271,18 +275,33 @@ input, button, select, textarea {
     display: none !important;
 }
 
-/* Cuando colapsado, la pestaña izquierda se ancla al borde del workspace */
+/* Botón flotante cuando colapsado */
 .sidebar-left.collapsed .sidebar-collapse-left {
     right: auto;
-    left: 0;
-    border-radius: 0 6px 6px 0;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.35;
+    background: rgba(13, 17, 27, 0.7);
 }
 
-/* Cuando colapsado, la pestaña derecha se ancla al borde del workspace */
+.sidebar-left.collapsed .sidebar-collapse-btn:hover {
+    opacity: 1;
+    background: rgba(30, 36, 52, 0.9);
+}
+
 .sidebar-right.collapsed .sidebar-collapse-right {
     left: auto;
-    right: 0;
-    border-radius: 6px 0 0 6px;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.35;
+    background: rgba(13, 17, 27, 0.7);
+}
+
+.sidebar-right.collapsed .sidebar-collapse-btn:hover {
+    opacity: 1;
+    background: rgba(30, 36, 52, 0.9);
 }
 
 .panel-section {
