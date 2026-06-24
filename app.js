@@ -3,13 +3,13 @@
  * Orquestador principal de la pizarra de voleibol. Importa los módulos y coordina la lógica global.
  */
 
-import { CourtManager } from './js/court.js?v=20260610-001';
-import { PlayerManager } from './js/players.js?v=20260610-001';
-import { DrawingManager } from './js/drawing.js?v=20260610-001';
-import { TimelineManager } from './js/timeline.js?v=20260610-001';
-import { StorageManager } from './js/storage.js?v=20260610-001';
-import { UserManager } from './js/users.js?v=20260610-001';
-import { RosterManager } from './js/roster.js?v=20260610-001';
+import { CourtManager } from './js/court.js?v=20260624-001';
+import { PlayerManager } from './js/players.js?v=20260624-001';
+import { DrawingManager } from './js/drawing.js?v=20260624-001';
+import { TimelineManager } from './js/timeline.js?v=20260624-001';
+import { StorageManager } from './js/storage.js?v=20260624-001';
+import { UserManager } from './js/users.js?v=20260624-001';
+import { RosterManager } from './js/roster.js?v=20260624-001';
 
 class App {
     constructor() {
@@ -43,6 +43,9 @@ class App {
         
         // 5b. Comprimir/expandir secuencia de jugada (timeline)
         this.setupTimelineToggle();
+
+        // 5c. Colapsar/expandir paneles laterales
+        this.setupSidebarToggles();
 
         // 6. Configurar el Modal de Ayuda
         this.setupHelpModal();
@@ -621,6 +624,35 @@ class App {
         btnToggle.addEventListener('click', () => {
             const willCollapse = !card.classList.contains('collapsed');
             setTimelineCollapsed(willCollapse, true);
+        });
+    }
+
+    /**
+     * Alterna la visibilidad de los paneles laterales para maximizar el espacio de la pizarra
+     */
+    setupSidebarToggles() {
+        const leftBtn = document.querySelector('.sidebar-collapse-left');
+        const rightBtn = document.querySelector('.sidebar-collapse-right');
+        const leftPanel = document.querySelector('.sidebar-left');
+        const rightPanel = document.querySelector('.sidebar-right');
+
+        if (!leftBtn || !rightBtn || !leftPanel || !rightPanel) return;
+
+        const leftKey = 'vt-sidebar-left-collapsed';
+        const rightKey = 'vt-sidebar-right-collapsed';
+
+        // Restaurar estado guardado
+        if (localStorage.getItem(leftKey) === '1') leftPanel.classList.add('collapsed');
+        if (localStorage.getItem(rightKey) === '1') rightPanel.classList.add('collapsed');
+
+        leftBtn.addEventListener('click', () => {
+            leftPanel.classList.toggle('collapsed');
+            localStorage.setItem(leftKey, leftPanel.classList.contains('collapsed') ? '1' : '0');
+        });
+
+        rightBtn.addEventListener('click', () => {
+            rightPanel.classList.toggle('collapsed');
+            localStorage.setItem(rightKey, rightPanel.classList.contains('collapsed') ? '1' : '0');
         });
     }
 

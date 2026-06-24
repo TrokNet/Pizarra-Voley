@@ -209,6 +209,82 @@ input, button, select, textarea {
     width: var(--right-panel-width);
 }
 
+/* ==========================================================================
+   SIDEBAR COLLAPSE TOGGLE
+   ========================================================================== */
+
+.sidebar-collapse-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 64px;
+    background: rgba(13, 17, 27, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 20;
+    color: rgba(255, 255, 255, 0.55);
+    padding: 0;
+    transition: background var(--transition-smooth), color var(--transition-smooth);
+}
+
+.sidebar-collapse-btn:hover {
+    background: rgba(30, 36, 52, 0.95);
+    color: #ffffff;
+}
+
+.sidebar-collapse-btn svg {
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+}
+
+/* Pestaña izquierda: se asoma por el borde derecho del sidebar */
+.sidebar-collapse-left {
+    right: -28px;
+    border-radius: 0 6px 6px 0;
+    border-left: none;
+}
+
+/* Pestaña derecha: se asoma por el borde izquierdo del sidebar */
+.sidebar-collapse-right {
+    left: -28px;
+    border-radius: 6px 0 0 6px;
+    border-right: none;
+}
+
+/* === SIDEBAR COLAPSADO === */
+.sidebar.collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
+    overflow: visible;
+    border: none !important;
+    padding: 0 !important;
+}
+
+.sidebar.collapsed > *:not(.sidebar-collapse-btn) {
+    display: none !important;
+}
+
+/* Cuando colapsado, la pestaña izquierda se ancla al borde del workspace */
+.sidebar-left.collapsed .sidebar-collapse-left {
+    right: auto;
+    left: 0;
+    border-radius: 0 6px 6px 0;
+}
+
+/* Cuando colapsado, la pestaña derecha se ancla al borde del workspace */
+.sidebar-right.collapsed .sidebar-collapse-right {
+    left: auto;
+    right: 0;
+    border-radius: 6px 0 0 6px;
+}
+
 .panel-section {
     border-bottom: 1px solid var(--border-color);
     padding: 20px;
@@ -2016,6 +2092,20 @@ input, button, select, textarea {
         height: auto;
         border: none;
         max-height: 40vh;
+    }
+
+    .sidebar.collapsed {
+        width: 100% !important;
+        min-width: auto !important;
+        overflow: visible;
+    }
+
+    .sidebar.collapsed > *:not(.sidebar-collapse-btn) {
+        display: flex !important;
+    }
+
+    .sidebar-collapse-btn {
+        display: none;
     }
     
     .sidebar-left {

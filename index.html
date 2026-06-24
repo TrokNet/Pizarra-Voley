@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pizarra Táctica de Voleibol - VoleyTactics</title>
     <meta name="description" content="Una pizarra táctica interactiva avanzada para voleibol. Diseña estrategias, rotaciones y anima jugadas en tiempo real.">
-    <link rel="stylesheet" href="style.css?v=20260610-001">
+    <link rel="stylesheet" href="style.css?v=20260624-001">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -69,6 +69,9 @@
         <div class="app-workspace">
             <!-- PANEL IZQUIERDO: HERRAMIENTAS Y AJUSTES -->
             <aside class="sidebar sidebar-left" aria-label="Herramientas de dibujo y cancha">
+                <button class="sidebar-collapse-btn sidebar-collapse-left" title="Ocultar panel izquierdo" aria-label="Colapsar panel izquierdo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </button>
                 <!-- SECCIÓN DIBUJO -->
                 <div class="panel-section">
                     <h2 class="section-title">Herramientas Tácticas</h2>
@@ -397,6 +400,9 @@
 
             <!-- PANEL DERECHO: EQUIPOS Y SISTEMAS PREDEFINIDOS -->
             <aside class="sidebar sidebar-right" aria-label="Equipos y tácticas predefinidas">
+                <button class="sidebar-collapse-btn sidebar-collapse-right" title="Ocultar panel derecho" aria-label="Colapsar panel derecho">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </button>
                 <!-- SECCIÓN EDITAR SELECCIONADO -->
                 <div class="panel-section" id="player-editor-panel">
                     <div class="section-header-row">
@@ -935,6 +941,6 @@
     </svg>
 
     <!-- CARGA DE SCRIPTS -->
-    <script type="module" src="app.js?v=20260610-001"></script>
+    <script type="module" src="app.js?v=20260624-001"></script>
 </body>
 </html>

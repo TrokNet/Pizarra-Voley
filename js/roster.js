@@ -4,8 +4,8 @@
  * posición favorita, persistencia local por usuario y modal de gestión.
  */
 
-import { LocalDatabase } from './localdb.js?v=20260610-001';
-import { ServerApi } from './api.js?v=20260610-001';
+import { LocalDatabase } from './localdb.js?v=20260624-001';
+import { ServerApi } from './api.js?v=20260624-001';
 
 export class RosterManager {
     constructor() {
